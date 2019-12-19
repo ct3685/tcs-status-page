@@ -1,0 +1,2 @@
+heroku config -s -a stage-getsava > config-heroku.txt
+cat config-heroku.txt | tr '\n' ' ' | xargs heroku config:set -a prod-sava
