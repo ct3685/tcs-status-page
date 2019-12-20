@@ -1,1 +1,17 @@
-<h1>Hello {{pageData.hello}}!</h1>
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+      {{#each pageData.services.bigCommerce.items}}
+    <li>{{this.title}}</li>
+  {{/each}}
+    </div>
+    <div class="col-sm">
+      {{#each pageData.services.bigCommerce.items}}
+    <li>{{this.title}}</li>
+  {{/each}}
+    </div>
+    <div class="col-sm">
+      One of three columns
+    </div>
+  </div>
+</div>

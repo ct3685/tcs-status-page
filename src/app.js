@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const sentry = require('@sentry/node');
 const hbsHelpers = require('handlebars-helpers')();
 
+
 // Configuration
 const config = require('./server/config');
 const preRouteDecorator = require('./server/middleware/pre_route_decorator');
