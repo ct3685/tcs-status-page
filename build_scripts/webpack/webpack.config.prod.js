@@ -1,6 +1,6 @@
 const merge = require('webpack-merge');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const SentryCliPlugin = require('@sentry/webpack-plugin');
+// const SentryCliPlugin = require('@sentry/webpack-plugin');
 const common = require('./webpack.common.js');
 
 // REMOVE ONCE HASH IS READY
@@ -42,11 +42,11 @@ module.exports = merge(common, {
     // This plugin will take the files that are output and
     // upload them to Sentry for mapping
     // https://github.com/getsentry/sentry-webpack-plugin
-    new SentryCliPlugin({
-      include: '.',
-      ignoreFile: '.sentrycliignore',
-      ignore: ['node_modules', 'webpack'],
-      release: gitSha,
-    }),
+    // new SentryCliPlugin({
+    //   include: '.',
+    //   ignoreFile: '.sentrycliignore',
+    //   ignore: ['node_modules', 'webpack'],
+    //   release: gitSha,
+    // }),
   ],
 });

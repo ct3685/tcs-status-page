@@ -13,6 +13,7 @@ const json = (res) => {
     logger.log('error', 'responded in json with errors');
     logger.log('error', res.locals.error);
   }
+  debugger;
   res.json(res.locals);
 };
 
