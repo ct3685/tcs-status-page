@@ -1,0 +1,28 @@
+body {
+    font-family: 'Roboto', sans-serif !important;
+}
+
+.card-header {
+    width: 100%;
+
+}
+.accordion .card-header:after {
+    font-family: 'FontAwesome';  
+    content: "\f062";
+    // float: right; 
+    position: absolute;
+    right: 2rem;
+    top: 1.35rem;
+    color: rgb(58, 155, 58);
+}
+.accordion .card-header.collapsed:after {
+    content: "\f062";
+    color: rgb(58, 155, 58);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    position: absolute;
+    top: 1rem;
+}
+
