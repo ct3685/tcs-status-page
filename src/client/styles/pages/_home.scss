@@ -2,27 +2,54 @@ body {
     font-family: 'Roboto', sans-serif !important;
 }
 
-.card-header {
-    width: 100%;
-
-}
-.accordion .card-header:after {
-    font-family: 'FontAwesome';  
-    content: "\f062";
-    // float: right; 
-    position: absolute;
-    right: 2rem;
-    top: 1.35rem;
-    color: rgb(58, 155, 58);
-}
-.accordion .card-header.collapsed:after {
-    content: "\f062";
-    color: rgb(58, 155, 58);
+.container,
+.container-lg,
+.container-md,
+.container-sm,
+.container-xl {
+    @media (min-width: 1201px) {
+    max-width: 1250px;
+    }
 }
 
+.accordion {
+    .card-header {
+        width: 100%;
+        
+        &::after {
+            font-family: 'FontAwesome';  
+            position: absolute;
+            right: 2rem;
+            top: 1.35rem;
+            content: "\f062";
+            color: rgb(58, 155, 58);    
+        }
+        
+        &.collapsed {
+            &::after {
+                content: "\f062";
+            }
+        }
+
+        &.status-blue::after {
+            color: blue;
+        }
+    }
+}
+    
 .card-title {
     font-size: 1.5rem;
     position: absolute;
     top: 1rem;
 }
 
+.issue-btn {
+    width: 100%;
+}
+
+.close-btn {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1rem;
+}

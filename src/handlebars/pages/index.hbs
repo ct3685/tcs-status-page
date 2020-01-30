@@ -1,12 +1,18 @@
 <div class="container">
-  <div class="row p-3">
+  <div>
     <h1>Welcome</h1>
   </div>
-  <div class="row p-3">
+  <div>
     <div class="container">
       <div id="accordion" class="accordion">
 
-        {{!-- Heroku Status Card --}}
+        {{!--Status Cards --}}
+        {{!-- {{#forOwn pageData.services service=object}}
+        <div>
+          {{@key}}
+        </div>
+        {{/forOwn}} --}}
+
         <div class="card mb-2 border">
           <div class="card-header collapsed" data-toggle="collapse" href="#herokuStatus">
               <img class='mr-3' src="/images/herokuLogo.png" height='40px' alt="">
@@ -14,18 +20,53 @@
           </div>
           <div id="herokuStatus" class="card-body collapse" data-parent="#accordion">
             <div class="mb-4 incidentsWrapper">
-              <h5>Date of Incident: 01/20/2019</h4>
-              <h6>Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.</h6>
-            </div>
-
-            <div class="mb-4 incidentsWrapper">
-              <h5>Date of Incident: 01/20/2019</h4>
-              <h6>Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.</h6>
-            </div>
-
-            <div class="mb-4 incidentsWrapper">
-              <h5>Date of Incident: 01/20/2019</h4>
-              <h6>Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.</h6>
+              {{#each (pullArray array=pageData.services.herokuIssues amount=5)}}
+                <div class="container border mb-3">
+                  <div class="row my-auto">
+                    <div class="col-md-2 border d-flex align-items-center">
+                      {{moment this.created_at "LL"}}</br>
+                      {{moment this.created_at "LT"}}
+                    </div>
+                    <div class="col-md-6 border d-flex align-items-center">
+                      {{this.title}}
+                    </div>
+                    <div class="col-md-2 border text-capitalize d-flex align-items-center">
+                      Status: {{this.state}}
+                    </div>
+                    <div class="col-md-2 border d-flex align-items-center">
+                      <a class='btn btn-primary issue-btn' data-toggle="collapse" href="#issue-{{this.id}}" aria-expanded="false" aria-controls="issue-{{this.id}}">More Info</a>
+                    </div>
+                  </div>
+                  <div class="collapse" id="issue-{{this.id}}">
+                    <div class="container py-0">
+                          <div class="row">
+                            <table class="table table-hover">
+                              <thead>
+                                <tr>
+                                  <th scope="col">Date &amp; Time</th>
+                                  <th scope="col">Description</th>
+                                  <th scope="col">Update Type</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                        {{#each this.updates}}
+                                <tr>
+                                  <th scope="row">
+                                    {{moment this.updated_at "L"}}</br>
+                                    {{moment this.updated_at "LT"}}
+                                  </th>
+                                  <td>{{this.contents}}</td>
+                                  <td class='text-capitalize'>{{this.update_type}}</td>
+                                </tr>
+                        {{/each}}
+                              </tbody>
+                            </table>
+                              <a class='btn btn-outline-danger close-btn' data-toggle="collapse" href="#issue-{{this.id}}" aria-expanded="false" aria-controls="issue-{{this.id}}">Close Issue Details</a>
+                          </div>
+                    </div>
+                  </div>
+                </div>
+              {{/each}}
             </div>
 
             <div>
@@ -36,40 +77,6 @@
           </div>
         </div>
         {{!-- Heroku Status Card --}}
-
-
-        {{!-- New Status Card Template --}}
-
-        <div class="card mb-2 border">
-          <div class="card-header collapsed" data-toggle="collapse" href="#changeme">
-              <img class='mr-3' src="/images/herokuLogo.png" height='40px' alt="">
-              <a class="card-title">Heroku Status</a>
-          </div>
-          <div id="changeme" class="card-body collapse" data-parent="#accordion">
-            <div class="mb-4 incidentsWrapper">
-              <h5>Date of Incident: 01/20/2019</h4>
-              <h6>Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.</h6>
-            </div>
-
-            <div class="mb-4 incidentsWrapper">
-              <h5>Date of Incident: 01/20/2019</h4>
-              <h6>Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.</h6>
-            </div>
-
-            <div class="mb-4 incidentsWrapper">
-              <h5>Date of Incident: 01/20/2019</h4>
-              <h6>Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod.</h6>
-            </div>
-
-            <div>
-              <p>Use the button below to find more information about the current status of Heroku.</p>
-              <a href="https://status.heroku.com/"><button type="button" class="btn btn-outline-primary">Heroku Status Page</button></a>
-            </div>
-
-          </div>
-        </div>
-        {{!-- New Status Card Template --}}
-
 
 
 

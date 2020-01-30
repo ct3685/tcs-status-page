@@ -33,8 +33,7 @@ const detail = async (req, res, next) => {
     
     const promiseArray = []
 
-    promiseArray.push(getHerokuPromise('https://status.heroku.com/api/v4/current-status'));
-    promiseArray.push(getHerokuPromise('https://status.heroku.com/api/v4/incidents?since=2019-11-01&per_page=1'));
+    promiseArray.push(getHerokuPromise('https://status.heroku.com/api/v4/incidents'));
     promiseArray.push(parser.parseURL('https://status.bigcommerce.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.netlifystatus.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.circleci.com/history.rss'));
@@ -42,20 +41,15 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://status.sentry.io/history.rss'));
     promiseArray.push(parser.parseURL('https://jira-service-desk.status.atlassian.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.google.com/appsstatus/rss/en'));
-    promiseArray.push(parser.parseURL('https://www.google.com/appsstatus/rss/en')); // change to zoom rss feed
+    promiseArray.push(parser.parseURL('https://status.zoom.us/history.rss'));
     promiseArray.push(parser.parseURL('https://www.contentfulstatus.com/history.rss'));
 
-    const [herokuStatus, herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, googleApps, zoom, contentful] = await Promise.all(promiseArray);
+    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, googleApps, zoom, contentful] = await Promise.all(promiseArray);
 debugger
-    
-    // const herokuIssuesFeed = await getHerokuPromise('https://status.heroku.com/api/v4/issue-status');
-    
-    herokuStatus.color = 'blue'
 
     // Parse that data and put into an object
     res.locals.pageData = {
       services: {
-        herokuStatus,
         herokuIssues,
         bigCommerce,
         netlify,
@@ -63,11 +57,18 @@ debugger
         cloudways,
         sentry,
         jiraServiceDesk,
-        googleApps,
+        // googleApps,
         zoom,
         contentful
       }
     }
+
+    const herokuNormalized = {
+      name: 'Test'
+    }
+
+
+    console.log(herokuNormalized)
 
     // The .hbs file to use in the folder ./handlebars/pages
     res.locals.view = 'index';
