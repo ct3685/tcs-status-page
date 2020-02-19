@@ -91,3 +91,96 @@ Go to [http://localhost:3000](http://localhost:3000)
  | [webpack-hot-middleware@^2.25.0](https://github.com/webpack-contrib/webpack-hot-middleware#readme) | Webpack hot reloading you can attach to your own server | 2.25.0 | MIT | dev | 
  | [webpack-merge@^4.2.1](https://github.com/survivejs/webpack-merge) | Variant of merge that's useful for webpack configuration | 4.2.1 | MIT | dev | 
 <!-- AUTO-GENERATED-CONTENT:END -->
+
+
+
+
+
+
+
+
+## Notes
+<pre><code>
+// Normalizing Heroku Status Page Feed
+
+// this function is used to normalize the heroku feed. In pagedata.services below the feed is the first variable and the two string as are passed in. As a refactor I'd like to do this a little differently to add in as an array or class or something in order to minimize the duplication or make it easier to add a new feed maybe...
+const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName) => { 
+  //this is the function used to create the new object that will be used in handlebars/the json viewer and what will normalize the data.
+  const herokuNormalized = {
+    //the three objects below are created to be used instead of the initial raw data, add more here to add it to the json view, don't forget to bring the information in through the normalizeHerokuFeed function above as well.
+    serviceName: serviceDisplayName,
+    serviceId: serviceIdName,
+    //creating the array for the data from the raw feed
+    issues: [],
+  };
+  
+  // this function uses feed (the heroku raw feed) and loops through the feed objects and gives them new names (keys?) inside of the issues array above. 
+  _.each(feed, herokuIssue => {
+    // creating a new object to hold the data that will be pushed in to the issues array.
+    const normIssue = {
+    // the left is the new object (key?) and the value is the right where we will call the propertys of the object. Feed is renamed 'herokuIssue' using lodash's 2nd parameter inside of the _.each(var1, var2)
+    //Because 'feed' is an array of objects, we will call each item from the feed using dot notation (ex: 'var2.key' key=the original name of the object inside of the feed. )
+      id: herokuIssue.id,
+      pubDate: herokuIssue.create_at,
+      title: herokuIssue.title,
+      state: herokuIssue.state,
+      fullUrl: herokuIssue.full_url,
+      // here we create a new array that we will use a nested function from inside of the normIssue function that will allow us to grab the information inside of the updates array that we will need to loop through in a new '_.each' function that will be pushed to the normIssues object updates array before we send the information to the issues array inside of the normalizeHeroku object.
+      updates: []
+    };
+
+    // so because we are inside of the normIssue object using herokuIssue as the name of the feed we will call it using the herokuIssue in place of feed from the above _.each but we need to select the updates[] whcih is what we will be looping through. We then rename it to just 'updates'. (ex. herokueIssue.updates === updates -aka- var1 === var2)
+    _.each(herokuIssue.updates, updates => {
+    // creating a new const var inside of the function that we will call the information just like we did above.
+      const updateIssue = {
+        id: updates.id,
+        title: updates.content,
+        state: updates.update_type
+
+      }
+      // because we are nested inside of another '_.each' (for loop but using lodash) we need to push to the updates array inside of the normIssue variable.
+      normIssue.updates.push(updateIssue);
+    });
+
+    // we are pushing the data from the normIssue variable above in to the issues array inside of the herokuNormalized object
+    herokuNormalized.issues.push(normIssue);
+  }); 
+    //this is where we will return the information back to feed and give the original feed variable the new information
+  return herokuNormalized;
+};
+
+
+    // Parse that data and put into an object
+    res.locals.pageData = {
+      // originalData: {
+      //   herokuIssues,
+      //   bigCommerce,
+      //   netlify,
+      //   circleCi,
+      //   cloudways,
+      //   sentry,
+      //   jiraServiceDesk,
+      //   zoom,
+      //   contentfulFeed
+      // },
+      services: {
+        herokuIssues: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku'),
+        bigCommerce: normalizeRssFeed(bigCommerce, 'BigCommerce', 'bigcommerce'),
+        netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify'),
+        circleCi: normalizeRssFeed(circleCi, 'Circle Ci', 'circleci'),
+        cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways'),
+        sentry: normalizeRssFeed(sentry, 'Sentry', 'sentry'),
+        jiraServiceDesk: normalizeRssFeed(jiraServiceDesk, 'Jira Service Desk', 'jiraservicedesk'),
+        zoom: normalizeRssFeed(zoom, 'Zoom', 'zoom'),
+        contentfulFeed: normalizeRssFeed(contentfulFeed, 'Contentful', 'contentful')
+      }
+    }
+
+</code></pre>
+
+<code><pre>
+// helped with finding typeof etc to track down moment() bug
+    console.log('RETRUNED VALUE TYPE: ', typeof herokuIssue.created_at);
+    console.log('MOMENT TYPEOF: ', typeof moment(herokuIssue.created_at, "MMMM"))
+    console.log('Value of Object: ', moment(herokuIssue.created_at, "MMMM"))
+</code></pre>

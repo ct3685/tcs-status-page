@@ -1,6 +1,8 @@
 const Parser = require('rss-parser');
 const parser = new Parser();
 const request = require('request');
+const _ = require('lodash');
+const moment = require('moment-timezone');
 
 const detail = async (req, res, next) => {
   // Full example for index.hbs
@@ -40,35 +42,134 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('http://status.cloudways.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.sentry.io/history.rss'));
     promiseArray.push(parser.parseURL('https://jira-service-desk.status.atlassian.com/history.rss'));
-    promiseArray.push(parser.parseURL('https://www.google.com/appsstatus/rss/en'));
     promiseArray.push(parser.parseURL('https://status.zoom.us/history.rss'));
     promiseArray.push(parser.parseURL('https://www.contentfulstatus.com/history.rss'));
 
-    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, googleApps, zoom, contentful] = await Promise.all(promiseArray);
+    let [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed] = await Promise.all(promiseArray);
 debugger
+
+// Normalizing Heroku Status Page Feed
+const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
+  const mostRecentIssues = _.head(feed)
+  const mostRecentIssue = mostRecentIssues.created_at
+  
+  const statusColor = (mostRecentIssue) => {
+    if (moment(mostRecentIssue).isAfter(moment())) {
+      return 'status-blue';
+    } else if (moment(mostRecentIssue).isAfter(moment().subtract( 3,'h' ))) {
+      return 'status-red';
+    } else if (moment(mostRecentIssue).isAfter(moment().subtract( 12,'h' ))) {
+      return 'status-yellow';
+    }
+    return 'status-green';
+  }
+
+  const herokuNormalized = {
+    issueClassColor: statusColor(mostRecentIssue),
+    serviceName: serviceDisplayName,
+    serviceId: serviceIdName,
+    serviceURL: serviceURL,
+    serviceLogo: '/images/' + serviceIdName + 'Logo.png',
+    issues: [],
+  };
+  
+  _.each(feed, herokuIssue => {
+    const normIssue = {
+      isHerokuFeed: true,
+      id: herokuIssue.id,
+      pubDate: moment(herokuIssue.created_at).format("MMM DD, YYYY"),
+      pubTime: moment(herokuIssue.created_at).tz('America/Los_Angeles').format("HH:mm"),
+      title: herokuIssue.title,
+      state: herokuIssue.state,
+      fullUrl: herokuIssue.full_url,
+      updates: []
+    };
+  
+    _.each(herokuIssue.updates, updates => {
+      const updateIssue = {
+        pubDate: moment(updates.created_at).format("MMM DD,"),
+        pubTime: moment(updates.created_at).tz('America/Los_Angeles').format("HH:mm"),
+        title: updates.contents,
+        state: updates.update_type
+      }
+      normIssue.updates.push(updateIssue);
+    });
+
+    herokuNormalized.issues.push(normIssue);
+  }); 
+
+  return herokuNormalized;
+};
+
+// Normalizing All Current RSS Feeds coming from Atlassian Status Page
+const normalizeRssFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
+  
+  const mostRecentIssue = _.head(feed.items)
+
+  const statusColor = (mostRecentIssue) => {
+    if (moment(mostRecentIssue.isoDate).isAfter(moment())) {
+      return 'status-blue';
+    } else if (moment(mostRecentIssue.isoDate).isAfter(moment().subtract( 3,'h' ))) {
+    return 'status-red';
+    } else if (moment(mostRecentIssue.isoDate).isAfter(moment().subtract( 12,'h' ))) {
+      return 'status-yellow';
+    }
+    return 'status-green';
+  }
+
+  const rssNormalized = {
+    issueClassColor: statusColor(mostRecentIssue),
+    serviceName: serviceDisplayName,
+    serviceId: serviceIdName,
+    serviceURL: serviceURL,
+    serviceLogo: '/images/' + serviceIdName + 'Logo.png',
+    issues: [] 
+  };
+
+  _.each(feed.items, issue => {
+    const normIssue = {
+      isAtlassianFeed: true,
+      id: new Date(issue.isoDate).getTime(),
+      pubDate: moment(issue.isoDate).format("MMM DD, YYYY"),
+      pubTime: moment(issue.isoDate).tz('America/Los_Angeles').format("HH:mm"),
+      title: issue.title,      
+      fullUrl: issue.fullUrl,
+      content: issue.content
+    };
+    rssNormalized.issues.push(normIssue);
+  });
+
+  return rssNormalized;
+};
 
     // Parse that data and put into an object
     res.locals.pageData = {
+      // // original data if needing to troubleshoot
+      // originalData: {
+      //   bigCommerce,
+      //   circleCi,
+      //   cloudways,
+      //   contentfulFeed,
+      //   herokuIssues,
+      //   jiraServiceDesk,
+      //   netlify,
+      //   sentry,
+      //   zoom
+      // },
       services: {
-        herokuIssues,
-        bigCommerce,
-        netlify,
-        circleCi,
-        cloudways,
-        sentry,
-        jiraServiceDesk,
-        // googleApps,
-        zoom,
-        contentful
+        //use alphabetical order please
+        // feedName: normailzeFunc(feedNameAgain, 'DisplayName', 'idForClassesandIDsNoDashesAllLowercase', 'serviceStatusPageNonRssOrJsonFeedUrl' )
+        bigCommerce: normalizeRssFeed(bigCommerce, 'BigCommerce', 'bigcommerce', 'https://status.bigcommerce.com/'),
+        circleCi: normalizeRssFeed(circleCi, 'Circle Ci', 'circleci', 'https://status.circleci.com/'),
+        cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways', 'http://status.cloudways.com/'),
+        contentfulFeed: normalizeRssFeed(contentfulFeed, 'Contentful', 'contentful', 'https://www.contentfulstatus.com/'),
+        herokuIssues: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),
+        jiraServiceDesk: normalizeRssFeed(jiraServiceDesk, 'Jira Service Desk', 'jiraservicedesk', 'https://jira-service-desk.status.atlassian.com/'),
+        netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify', 'https://www.netlifystatus.com/'),
+        sentry: normalizeRssFeed(sentry, 'Sentry', 'sentry', 'https://status.sentry.io/'),
+        zoom: normalizeRssFeed(zoom, 'Zoom', 'zoom', 'https://status.zoom.us/'),
       }
     }
-
-    const herokuNormalized = {
-      name: 'Test'
-    }
-
-
-    console.log(herokuNormalized)
 
     // The .hbs file to use in the folder ./handlebars/pages
     res.locals.view = 'index';
