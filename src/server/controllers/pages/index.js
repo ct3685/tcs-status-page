@@ -44,9 +44,9 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://status.zoom.us/history.rss'));
     promiseArray.push(parser.parseURL('https://www.contentfulstatus.com/history.rss'));
     promiseArray.push(parser.parseURL('http://status.formassembly.com/history.rss'));
+    promiseArray.push(parser.parseURL('https://www.githubstatus.com/history.rss'));
 
-    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed] = await Promise.all(promiseArray);
-    debugger;
+    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed] = await Promise.all(promiseArray);
 
     // Normalizing Heroku Status Page Feed
     const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
@@ -149,6 +149,8 @@ const detail = async (req, res, next) => {
       //   circleCi,
       //   cloudways,
       //   contentfulFeed,
+      //   formAssemblyFeed,
+      //   github,
       //   herokuIssues,
       //   jiraServiceDesk,
       //   netlify,
@@ -163,6 +165,7 @@ const detail = async (req, res, next) => {
         cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways', 'http://status.cloudways.com/'),
         contentfulFeed: normalizeRssFeed(contentfulFeed, 'Contentful', 'contentful', 'https://www.contentfulstatus.com/'),
         formAssemblyFeed: normalizeRssFeed(formAssemblyFeed, 'Form Assembly', 'formassembly', 'http://status.formassembly.com/'),
+        githubFeed: normalizeRssFeed(githubFeed, 'Github', 'github', 'https://www.githubstatus.com/'),
         herokuIssues: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),
         jiraServiceDesk: normalizeRssFeed(jiraServiceDesk, 'Jira Service Desk', 'jiraservicedesk', 'https://jira-service-desk.status.atlassian.com/'),
         netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify', 'https://www.netlifystatus.com/'),
