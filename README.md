@@ -1,6 +1,6 @@
 ## The Status Page
 
-To begin clone this repo
+Clone this repo
 
 Download Dependencies
 ```
