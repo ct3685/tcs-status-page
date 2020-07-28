@@ -45,8 +45,9 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://www.contentfulstatus.com/history.rss'));
     promiseArray.push(parser.parseURL('http://status.formassembly.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.githubstatus.com/history.rss'));
+    promiseArray.push(parser.parseURL('https://www.cloudflarestatus.com/history.rss'));
 
-    const [herokuIssues, bigCommerce, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed] = await Promise.all(promiseArray);
+    const [herokuIssues, bigCommerce, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed] = await Promise.all(promiseArray);
 
     // Normalizing Heroku Status Page Feed
     const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
@@ -162,6 +163,7 @@ const detail = async (req, res, next) => {
         // feedName: normailzeFunc(feedNameAgain, 'DisplayName', 'idForClassesandIDsNoDashesAllLowercase', 'serviceStatusPageNonRssOrJsonFeedUrl' )
         bigCommerce: normalizeRssFeed(bigCommerce, 'BigCommerce', 'bigcommerce', 'https://status.bigcommerce.com/'),
         circleCi: normalizeRssFeed(circleCi, 'Circle Ci', 'circleci', 'https://status.circleci.com/'),
+        cloudflare: normalizeRssFeed(cloudflareFeed, 'Cloudflare', 'cloudflare', 'https://www.cloudflarestatus.com/'),
         cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways', 'http://status.cloudways.com/'),
         contentfulFeed: normalizeRssFeed(contentfulFeed, 'Contentful', 'contentful', 'https://www.contentfulstatus.com/'),
         formAssemblyFeed: normalizeRssFeed(formAssemblyFeed, 'Form Assembly', 'formassembly', 'http://status.formassembly.com/'),
