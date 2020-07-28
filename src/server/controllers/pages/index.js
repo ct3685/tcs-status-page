@@ -36,7 +36,7 @@ const detail = async (req, res, next) => {
 
     promiseArray.push(getHerokuPromise('https://status.heroku.com/api/v4/incidents'));
     promiseArray.push(parser.parseURL('https://status.bigcommerce.com/history.rss'));
-    // promiseArray.push(parser.parseURL('https://www.netlifystatus.com/history.rss'));
+    promiseArray.push(parser.parseURL('https://www.netlifystatus.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.circleci.com/history.rss'));
     promiseArray.push(parser.parseURL('http://status.cloudways.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.sentry.io/history.rss'));
@@ -47,7 +47,7 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://www.githubstatus.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.cloudflarestatus.com/history.rss'));
 
-    const [herokuIssues, bigCommerce, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed] = await Promise.all(promiseArray);
+    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed] = await Promise.all(promiseArray);
 
     // Normalizing Heroku Status Page Feed
     const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
@@ -170,7 +170,7 @@ const detail = async (req, res, next) => {
         githubFeed: normalizeRssFeed(githubFeed, 'Github', 'github', 'https://www.githubstatus.com/'),
         herokuIssues: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),
         jiraServiceDesk: normalizeRssFeed(jiraServiceDesk, 'Jira Service Desk', 'jiraservicedesk', 'https://jira-service-desk.status.atlassian.com/'),
-        // netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify', 'https://www.netlifystatus.com/'),
+        netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify', 'https://www.netlifystatus.com/'),
         sentry: normalizeRssFeed(sentry, 'Sentry', 'sentry', 'https://status.sentry.io/'),
         zoom: normalizeRssFeed(zoom, 'Zoom', 'zoom', 'https://status.zoom.us/'),
       },
