@@ -38,16 +38,17 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://status.bigcommerce.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.netlifystatus.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.circleci.com/history.rss'));
-    promiseArray.push(parser.parseURL('http://status.cloudways.com/history.rss'));
+    promiseArray.push(parser.parseURL('https://status.cloudways.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.sentry.io/history.rss'));
     promiseArray.push(parser.parseURL('https://jira-service-desk.status.atlassian.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.zoom.us/history.rss'));
     promiseArray.push(parser.parseURL('https://www.contentfulstatus.com/history.rss'));
-    promiseArray.push(parser.parseURL('http://status.formassembly.com/history.rss'));
+    promiseArray.push(parser.parseURL('https://status.formassembly.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.githubstatus.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.cloudflarestatus.com/history.rss'));
+    promiseArray.push(parser.parseURL('https://status.tempo.io/history.rss'));
 
-    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed] = await Promise.all(promiseArray);
+    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed] = await Promise.all(promiseArray);
 
     // Normalizing Heroku Status Page Feed
     const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
@@ -156,6 +157,7 @@ const detail = async (req, res, next) => {
       //   jiraServiceDesk,
       //   netlify,
       //   sentry,
+      //   tempo,
       //   zoom
       // },
       services: {
@@ -164,14 +166,15 @@ const detail = async (req, res, next) => {
         bigCommerce: normalizeRssFeed(bigCommerce, 'BigCommerce', 'bigcommerce', 'https://status.bigcommerce.com/'),
         circleCi: normalizeRssFeed(circleCi, 'Circle Ci', 'circleci', 'https://status.circleci.com/'),
         cloudflare: normalizeRssFeed(cloudflareFeed, 'Cloudflare', 'cloudflare', 'https://www.cloudflarestatus.com/'),
-        cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways', 'http://status.cloudways.com/'),
+        cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways', 'https://status.cloudways.com/'),
         contentfulFeed: normalizeRssFeed(contentfulFeed, 'Contentful', 'contentful', 'https://www.contentfulstatus.com/'),
-        formAssemblyFeed: normalizeRssFeed(formAssemblyFeed, 'Form Assembly', 'formassembly', 'http://status.formassembly.com/'),
+        formAssemblyFeed: normalizeRssFeed(formAssemblyFeed, 'Form Assembly', 'formassembly', 'https://status.formassembly.com/'),
         githubFeed: normalizeRssFeed(githubFeed, 'Github', 'github', 'https://www.githubstatus.com/'),
         herokuIssues: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),
         jiraServiceDesk: normalizeRssFeed(jiraServiceDesk, 'Jira Service Desk', 'jiraservicedesk', 'https://jira-service-desk.status.atlassian.com/'),
         netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify', 'https://www.netlifystatus.com/'),
         sentry: normalizeRssFeed(sentry, 'Sentry', 'sentry', 'https://status.sentry.io/'),
+        tempo: normalizeRssFeed(tempoFeed, 'Tempo', 'tempo', 'https://status.tempo.io/'),
         zoom: normalizeRssFeed(zoom, 'Zoom', 'zoom', 'https://status.zoom.us/'),
       },
     };
