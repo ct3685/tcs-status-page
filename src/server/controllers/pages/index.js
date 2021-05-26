@@ -47,8 +47,9 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://www.githubstatus.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.cloudflarestatus.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.tempo.io/history.rss'));
+    promiseArray.push(parser.parseURL('https://status.hubspot.com/history.rss'));
 
-    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed] = await Promise.all(promiseArray);
+    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed, hubspotFeed] = await Promise.all(promiseArray);
 
     // Normalizing Heroku Status Page Feed
     const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
@@ -171,6 +172,7 @@ const detail = async (req, res, next) => {
         formAssemblyFeed: normalizeRssFeed(formAssemblyFeed, 'Form Assembly', 'formassembly', 'https://status.formassembly.com/'),
         githubFeed: normalizeRssFeed(githubFeed, 'Github', 'github', 'https://www.githubstatus.com/'),
         herokuIssues: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),
+        hubspot: normalizeRssFeed(hubspotFeed, 'HubSpot', 'hubspot', 'https://status.hubspot.com/'),
         jiraServiceDesk: normalizeRssFeed(jiraServiceDesk, 'Jira Service Desk', 'jiraservicedesk', 'https://jira-service-desk.status.atlassian.com/'),
         netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify', 'https://www.netlifystatus.com/'),
         sentry: normalizeRssFeed(sentry, 'Sentry', 'sentry', 'https://status.sentry.io/'),
