@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "starter project for express and handlebars",
   "main": "index.js",
+  "engines": {
+    "node": "14.17.x"
+  },
   "scripts": {
     "build:clean": "rimraf public",
     "build:docs": "node ./build_scripts/docs",
