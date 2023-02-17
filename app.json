@@ -11,8 +11,8 @@
   },
   "formation": {
   },
-  "name": "getsava",
+  "name": "lastrev-status-up",
   "scripts": {
   },
-  "stack": "heroku-18"
+  "stack": "heroku-22"
 }
