@@ -51,8 +51,9 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://status.slack.com/feed/rss'));
     promiseArray.push(parser.parseURL('https://www.vercel-status.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.sendgrid.com/history.rss'));
+    promiseArray.push(parser.parseURL('https://status.envkey.com/history.rss'));
 
-    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed, hubspotFeed, slackFeed, vercelFeed, sendgridFeed] = await Promise.all(promiseArray);
+    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed, hubspotFeed, slackFeed, vercelFeed, sendgridFeed, envkeyFeed] = await Promise.all(promiseArray);
 
     // Normalizing Heroku Status Page Feed
     const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
@@ -108,10 +109,14 @@ const detail = async (req, res, next) => {
     };
 
     // Normalizing All Current RSS Feeds coming from Atlassian Status Page
+
     const normalizeRssFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
       const mostRecentIssue = _.head(feed.items);
 
       const statusColor = (mostRecentIssue) => {
+        if (!mostRecentIssue) {
+          return 'status-green';
+        }
         if (moment(mostRecentIssue.isoDate).isAfter(moment())) {
           return 'status-blue';
         } if (moment(mostRecentIssue.isoDate).isAfter(moment().subtract(3, 'h'))) {
@@ -131,18 +136,20 @@ const detail = async (req, res, next) => {
         issues: [],
       };
 
-      _.each(feed.items, (issue) => {
-        const normIssue = {
-          isAtlassianFeed: true,
-          id: new Date(issue.isoDate).getTime(),
-          pubDate: moment(issue.isoDate).format('MMM DD, YYYY'),
-          pubTime: moment(issue.isoDate).tz('America/Los_Angeles').format('HH:mm'),
-          title: issue.title,
-          fullUrl: issue.fullUrl,
-          content: issue.content,
-        };
-        rssNormalized.issues.push(normIssue);
-      });
+      if (feed.items) {
+        _.each(feed.items, (issue) => {
+          const normIssue = {
+            isAtlassianFeed: true,
+            id: new Date(issue.isoDate).getTime(),
+            pubDate: moment(issue.isoDate).format('MMM DD, YYYY'),
+            pubTime: moment(issue.isoDate).tz('America/Los_Angeles').format('HH:mm'),
+            title: issue.title,
+            fullUrl: issue.fullUrl,
+            content: issue.content,
+          };
+          rssNormalized.issues.push(normIssue);
+        });
+      }
 
       return rssNormalized;
     };
@@ -172,6 +179,7 @@ const detail = async (req, res, next) => {
         cloudflare: normalizeRssFeed(cloudflareFeed, 'Cloudflare', 'cloudflare', 'https://www.cloudflarestatus.com/'),
         cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways', 'https://status.cloudways.com/'),
         contentfulFeed: normalizeRssFeed(contentfulFeed, 'Contentful', 'contentful', 'https://www.contentfulstatus.com/'),
+        envkeyFeed: normalizeRssFeed(envkeyFeed, 'Envkey', 'envkey', 'https://status.envkey.com/'),
         formAssemblyFeed: normalizeRssFeed(formAssemblyFeed, 'Form Assembly', 'formassembly', 'https://status.formassembly.com/'),
         githubFeed: normalizeRssFeed(githubFeed, 'Github', 'github', 'https://www.githubstatus.com/'),
         herokuIssues: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),

@@ -37,9 +37,13 @@
               <img class='mr-3' src="{{this.serviceLogo}}" height='50' width="50" alt="">
               <a class="card-title">{{this.serviceName}}</a>
               {{#each (pullArray array=this.issues amount=1)}}
-              <div class="mt-2">
-                Most Recent Incident occured on {{this.pubDate}}
-              </div>
+                <div class="mt-2">
+                  {{#if this}}
+                    Most Recent Incident occurred on {{this.pubDate}}
+                  {{else}}
+                    There have been no recent incidents.
+                  {{/if}}
+                </div>
               {{/each}}
           </div>
           <div id="{{this.serviceId}}Status" class="card-body card-body-wrapper collapse" data-parent="#accordion">
@@ -49,46 +53,48 @@
             </div>
 
             <div class="mb-4">
-              {{#each (pullArray array=this.issues amount=5)}}
-                <div class="container">
-                  <div class="row my-auto incidents-wrapper">
-                    <div class="col-9 col-sm-11 d-flex align-items-center">
-                      <div class="py-2">
-                        <div>
-                          <strong><em>{{{this.pubDate}}}&nbsp;{{this.pubTime}} PST</em></strong>
-                    {{!-- BEGIN Columns used only for Heroku because we can see the current status of an incident --}}
-                    {{#if this.isHerokuFeed}}
-                      <div class="py-2">
-                        {{this.title}}
-                      </div>
-                    {{/if}}
-                    {{!-- END Columns used only for Heroku because we can see the current status of an incident --}}
-                    {{!-- BEGIN Columns used only for Atlassian Feeds, no status state available--}}
-                    {{#if this.isAtlassianFeed}}
-                      <div class="py-2">
-                        {{this.title}}
-                      </div>
-                    {{/if}}
-                    {{!-- END Columns used only for Atlassian Feeds, no status state available--}}
+              {{#if this.issues.length}}
+                {{#each (pullArray array=this.issues amount=5)}}
+                  <div class="container">
+                    <div class="row my-auto incidents-wrapper">
+                      <div class="col-9 col-sm-11 d-flex align-items-center">
+                        <div class="py-2">
+                          <div>
+                            <strong><em>{{{this.pubDate}}}&nbsp;{{this.pubTime}} PST</em></strong>
+                            {{!-- BEGIN Columns used only for Heroku because we can see the current status of an incident --}}
+                            {{#if this.isHerokuFeed}}
+                              <div class="py-2">
+                                {{this.title}}
+                              </div>
+                            {{/if}}
+                            {{!-- END Columns used only for Heroku because we can see the current status of an incident --}}
+                            {{!-- BEGIN Columns used only for Atlassian Feeds, no status state available--}}
+                            {{#if this.isAtlassianFeed}}
+                              <div class="py-2">
+                                {{this.title}}
+                              </div>
+                            {{/if}}
+                            {{!-- END Columns used only for Atlassian Feeds, no status state available--}}
+                          </div>
                         </div>
                       </div>
+                      <div class="col-3 col-sm-1 border-right-0 d-flex align-items-center p-0">
+                        <a class='mx-auto more-info-btn collapsed' data-toggle="collapse" href="#issue-{{this.id}}" aria-expanded="false" aria-controls="issue-{{this.id}}"></a>
+                      </div>
                     </div>
-                    <div class="col-3 col-sm-1 border-right-0 d-flex align-items-center p-0">
-                      <a class='mx-auto more-info-btn collapsed' data-toggle="collapse" href="#issue-{{this.id}}" aria-expanded="false" aria-controls="issue-{{this.id}}"></a>
-                    </div>
-                  </div>
-                  <div class="collapse" id="issue-{{this.id}}">
-                    <div class="container py-0">
-                          <div class="row">
+                    <div class="collapse" id="issue-{{this.id}}">
+                      <div class="container py-0">
                         {{!-- BEGIN normalizeHerokuFeed - Heroku Issues Feed Only --}}
                         {{#if this.isHerokuFeed}}
                           {{#each this.updates}}
-                            <div class="col-12 py-3">
-                              <div>
-                                <strong>{{this.pubDate}}&nbsp;{{this.pubTime}} PST</strong>
-                              </div>
-                              <div>
-                                <span class='text-capitalize text-primary'><strong>{{this.state}}</strong></span> - {{this.title}}
+                            <div class="row">
+                              <div class="col-12 py-3">
+                                <div>
+                                  <strong>{{this.pubDate}}&nbsp;{{this.pubTime}} PST</strong>
+                                </div>
+                                <div>
+                                  <span class='text-capitalize text-primary'><strong>{{this.state}}</strong></span> - {{this.title}}
+                                </div>
                               </div>
                             </div>
                           {{/each}}
@@ -98,15 +104,23 @@
                         {{!-- BEGIN All normalizeRssFeed's Data from content, Clients Using Jira Status Page --}}
                         {{#if this.isAtlassianFeed}}
                         <div class="isAtlassianFeed">
-                        {{{this.content}}}
+                          {{{this.content}}}
                         </div>
                         {{/if}}
                         {{!-- END All normalizeRssFeed's Data, Clients Using Jira Status Page --}}
-                          </div>
+                      </div>
+                    </div>
+                  </div>
+                {{/each}}
+              {{else}}
+                <div class="container">
+                  <div class="row my-auto incidents-wrapper">
+                    <div class="col-12 d-flex align-items-center justify-content-center my-3">
+                      No recent incidents to display.
                     </div>
                   </div>
                 </div>
-              {{/each}}
+              {{/if}}
             </div>
           </div>
         </div>
