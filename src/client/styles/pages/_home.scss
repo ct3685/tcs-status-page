@@ -1,147 +1,160 @@
-.col-sm-11,
-.col-sm-1,
-.col-12 {
-  @media (max-width: 768px) {
-    padding-left: 0.75rem !important;
-    padding-right: 0.25rem !important;
-  }
-}
-
-.welcome-header h1 {
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.welcome-sub-header p {
-  margin: 2rem;
-
-  @media (max-width: 768px) {
-    margin: 2rem auto;
-  }
-}
-
-.accordion {
-  .card-header {
-    width: 100%;
-
-    &::after {
-      font-family: "FontAwesome";
-      position: absolute;
-      right: 2rem;
-      top: 1.35rem;
-      content: "\f063";
-    }
-
-    &.collapsed {
-      &::after {
-        content: "\f062";
-      }
-    }
-
-    &.status-blue::after {
-      color: blue;
-    }
-
-    &.status-yellow::after {
-      color: #ffbf00;
-    }
-
-    &.status-red::after {
-      color: red;
-    }
-
-    &.status-green::after {
-      color: rgb(58, 155, 58);
-    }
-  }
-}
-
-.legend-icon-blue::before {
-  font-family: "FontAwesome";
-  content: "\f062";
-  margin-right: 1rem;
-  color: blue;
-}
-
-.legend-icon-yellow::before {
-  font-family: "FontAwesome";
-  content: "\f062";
-  margin-right: 1rem;
-  color: #ffbf00;
-}
-
-.legend-icon-red::before {
-  font-family: "FontAwesome";
-  content: "\f062";
-  margin-right: 1rem;
-  color: red;
-}
-
-.legend-icon-green::before {
-  font-family: "FontAwesome";
-  content: "\f062";
-  margin-right: 1rem;
-  color: rgb(58, 155, 58);
-}
-
+/* Base Icon Styling */
 .icon::before {
   display: inline-block;
   font-style: normal;
   font-variant: normal;
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
+  font-family: "FontAwesome";
+  margin-right: 1rem;
 }
-.login::before {
+
+/* Specific Color Icons */
+.legend-icon-blue::before {
   font-family: "FontAwesome";
   content: "\f062";
+  color: blue;
+  margin-right: 1rem;
+}
+.legend-icon-yellow::before {
+  font-family: "FontAwesome";
+  content: "\f062";
+  color: #ffbf00;
+  margin-right: 1rem;
+}
+.legend-icon-red::before {
+  font-family: "FontAwesome";
+  content: "\f062";
+  color: red;
+  margin-right: 1rem;
+}
+.legend-icon-green::before {
+  font-family: "FontAwesome";
+  content: "\f062";
+  color: rgb(58, 155, 58);
+  margin-right: 1rem;
+}
+
+/* Responsive Grid Padding */
+.col-sm-11,
+.col-sm-1,
+.col-12 {
+  @media (max-width: 768px) {
+    padding-left: 0.75rem;
+    padding-right: 0.25rem;
+  }
+}
+
+/* Headers */
+.welcome-header h1,
+.card-title {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.welcome-sub-header p {
+  margin: 2rem;
+  @media (max-width: 768px) {
+    margin: 2rem auto;
+  }
+}
+
+/* Card Styles */
+.card-header {
+  width: 100%;
+  position: relative;
+
+  &::after {
+    content: "\f063"; /* Default icon */
+    right: 2rem;
+    top: 1.35rem;
+  }
+
+  &.collapsed::after {
+    content: "\f062"; /* Collapsed icon */
+  }
+
+  &.status-blue::after,
+  &.status-yellow::after,
+  &.status-red::after,
+  &.status-green::after {
+    font-family: "FontAwesome";
+    position: absolute;
+    right: 2rem;
+    top: 1.35rem;
+  }
+
+  &.status-blue::after {
+    color: blue;
+  }
+  &.status-yellow::after {
+    color: #ffbf00;
+  }
+  &.status-red::after {
+    color: red;
+  }
+  &.status-green::after {
+    color: rgb(58, 155, 58);
+  }
 }
 
 .card-title {
-  font-size: 1.5rem;
-  position: absolute;
-  top: 1.35rem;
-  padding-right: 1rem;
+  font-size: calc(1rem + 0.5vw); /* Responsive font size */
+}
 
-  @media (max-width: 768px) {
-    font-size: 1.2rem;
+@media (max-width: 768px) {
+  .card-title {
     top: 1.6rem;
   }
 
-  @media (max-width: 500px) {
+  .card-body-wrapper,
+  .main-content-wrapper {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .card-body {
+    margin-bottom: -3em;
+  }
+}
+
+@media (max-width: 500px) {
+  .card-title {
     font-size: 1rem;
     top: 1rem;
   }
 }
 
-.more-info-btn {
-  font-size: 2rem;
+/* Buttons */
+.more-info-btn,
+.close-btn {
   text-decoration: none;
   font-weight: bold;
-  background-color: $tertiary;
-  border-radius: 50%;
-  height: 2rem;
-  width: 2rem;
-  line-height: 2rem;
   text-align: center;
+  border-radius: 50%;
+  background-color: $tertiary; /* Make sure $tertiary is defined */
   color: white;
 
   &:hover {
-    color: white;
+    background-color: lighten($tertiary, 10%); /* Assuming Sass is used */
   }
 
   &::after {
+    content: "-";
     position: relative;
     top: -0.15rem;
-    content: "-";
   }
 
-  &.collapsed {
-    &::after {
-      position: relative;
-      top: -0.15rem;
-      content: "+";
-    }
+  &.collapsed::after {
+    content: "+";
   }
+}
+
+.more-info-btn {
+  font-size: 2rem;
+  height: 2rem;
+  width: 2rem;
+  line-height: 2rem;
 
   @media (max-width: 768px) {
     margin-bottom: 0.5em;
@@ -150,15 +163,14 @@
 
 .close-btn {
   width: 50%;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 1rem;
+  margin: 1rem auto;
 
   @media (max-width: 768px) {
     width: 100%;
   }
 }
 
+/* Service Buttons */
 .services-btns {
   width: 100%;
   margin: 0.5em auto;
@@ -168,36 +180,19 @@
   }
 }
 
-.isAtlassianFeed {
-  p {
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  small {
-    font-size: 1rem;
-    font-weight: bold;
-  }
-
-  strong {
-    color: $primary;
-  }
+/* Miscellaneous Styles */
+.isAtlassianFeed p {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
 }
 
-.main-content-wrapper {
-  @media (max-width: 768px) {
-    padding-left: 0;
-    padding-right: 0;
-  }
+.isAtlassianFeed small {
+  font-size: 1rem;
+  font-weight: bold;
+}
 
-  .card-body-wrapper {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .card-body {
-    margin-bottom: -3em;
-  }
+.isAtlassianFeed strong {
+  color: $primary; /* Make sure $primary is defined */
 }
 
 .incidents-wrapper {
