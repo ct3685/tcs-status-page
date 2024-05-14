@@ -67,7 +67,7 @@
     "helmet": "^3.23.3",
     "jquery": "^3.5.1",
     "lodash": "^4.17.19",
-    "moment-timezone": "^0.5.31",
+    "moment-timezone": "^0.5.40",
     "morgan": "^1.10.0",
     "pm2": "^5.0.0",
     "popper.js": "^1.16.1",
