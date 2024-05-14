@@ -53,8 +53,9 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://status.sendgrid.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.envkey.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.openai.com/history.rss'));
+    promiseArray.push(parser.parseURL('https://status.upstash.com/history.rss'));
 
-    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed, hubspotFeed, slackFeed, vercelFeed, sendgridFeed, envkeyFeed, openaiFeed] = await Promise.all(promiseArray);
+    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed, hubspotFeed, slackFeed, vercelFeed, sendgridFeed, envkeyFeed, openaiFeed, upstashFeed] = await Promise.all(promiseArray);
 
     // Normalizing Heroku Status Page Feed
     const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
@@ -192,6 +193,7 @@ const detail = async (req, res, next) => {
         sentry: normalizeRssFeed(sentry, 'Sentry', 'sentry', 'https://status.sentry.io/'),
         slack: normalizeRssFeed(slackFeed, 'Slack', 'slack', 'https://status.slack.com/feed/rss/'),
         tempo: normalizeRssFeed(tempoFeed, 'Tempo', 'tempo', 'https://status.tempo.io/'),
+        upstash: normalizeRssFeed(upstashFeed, 'Upstash', 'upstash', 'https://status.upstash.com/'),
         vercel: normalizeRssFeed(vercelFeed, 'Vercel', 'vercel', 'https://www.vercel-status.com/'),
         zoom: normalizeRssFeed(zoom, 'Zoom', 'zoom', 'https://status.zoom.us/'),
       },
