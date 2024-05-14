@@ -56,7 +56,7 @@
     "babel-loader": "^8.1.0",
     "body-parser": "^1.19.2",
     "bootstrap": "^4.5.0",
-    "contentful": "^8.0.3",
+    "contentful": "^8.5.8",
     "cookie-parser": "^1.4.5",
     "express": "^4.17.3",
     "express-handlebars": "^3.1.0",
