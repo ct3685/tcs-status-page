@@ -146,6 +146,8 @@
   }
 
   &.collapsed::after {
+    position: relative;
+    top: -0.15rem;
     content: "+";
   }
 }
