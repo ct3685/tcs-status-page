@@ -35,7 +35,7 @@ const detail = async (req, res, next) => {
     const promiseArray = [];
 
     promiseArray.push(getHerokuPromise('https://status.heroku.com/api/v4/incidents'));
-    promiseArray.push(parser.parseURL('https://status.bigcommerce.com/history.rss'));
+    // promiseArray.push(parser.parseURL('https://status.bigcommerce.com/history.rss'));
     promiseArray.push(parser.parseURL('https://www.netlifystatus.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.circleci.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.cloudways.com/history.rss'));
@@ -56,7 +56,7 @@ const detail = async (req, res, next) => {
     promiseArray.push(parser.parseURL('https://status.upstash.com/history.rss'));
     promiseArray.push(parser.parseURL('https://status.anthropic.com/history.rss'));
 
-    const [herokuIssues, bigCommerce, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed, hubspotFeed, slackFeed, vercelFeed, sendgridFeed, envkeyFeed, openaiFeed, upstashFeed, anthropicFeed ] = await Promise.all(promiseArray);
+    const [herokuIssues, netlify, circleCi, cloudways, sentry, jiraServiceDesk, zoom, contentfulFeed, formAssemblyFeed, githubFeed, cloudflareFeed, tempoFeed, hubspotFeed, slackFeed, vercelFeed, sendgridFeed, envkeyFeed, openaiFeed, upstashFeed, anthropicFeed] = await Promise.all(promiseArray);
 
     // Normalizing Heroku Status Page Feed
     const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
@@ -178,7 +178,7 @@ const detail = async (req, res, next) => {
         // use alphabetical order please
         // feedName: normailzeFunc(feedNameAgain, 'DisplayName', 'idForClassesandIDsNoDashesAllLowercase', 'serviceStatusPageNonRssOrJsonFeedUrl' )
         anthropic: normalizeRssFeed(anthropicFeed, 'Anthropic', 'anthropic', 'https://status.anthropic.com/'),
-        bigCommerce: normalizeRssFeed(bigCommerce, 'BigCommerce', 'bigcommerce', 'https://status.bigcommerce.com/'),
+        // bigCommerce: normalizeRssFeed(bigCommerce, 'BigCommerce', 'bigcommerce', 'https://status.bigcommerce.com/'),
         circleCi: normalizeRssFeed(circleCi, 'Circle Ci', 'circleci', 'https://status.circleci.com/'),
         cloudflare: normalizeRssFeed(cloudflareFeed, 'Cloudflare', 'cloudflare', 'https://www.cloudflarestatus.com/'),
         cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways', 'https://status.cloudways.com/'),
