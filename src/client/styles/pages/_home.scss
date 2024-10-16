@@ -200,3 +200,48 @@
 .incidents-wrapper {
   border-top: 1px solid #8c8c8c;
 }
+
+/* Add these styles to the existing file */
+
+.legend-container {
+  @media (max-width: 767px) {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+.legend-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.legend-icon-green,
+.legend-icon-yellow,
+.legend-icon-red,
+.legend-icon-blue {
+  display: inline-block;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.4;
+
+  &::before {
+    position: absolute;
+    left: 0;
+    top: 0.2rem;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .legend-item {
+    margin-bottom: 1rem;
+  }
+
+  .legend-icon-green,
+  .legend-icon-yellow,
+  .legend-icon-red,
+  .legend-icon-blue {
+    font-size: 0.9rem;
+  }
+}
