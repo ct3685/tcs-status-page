@@ -58,7 +58,10 @@
               {{#if this.issues.length}}
                 {{#each (pullArray array=this.issues amount=5)}}
                   <div class="container">
-                    <div class="row my-auto incidents-wrapper">
+                    <div class="row my-auto incidents-wrapper 
+                      {{#if this.isFutureMaintenance}}maintenance-event{{/if}}
+                      {{#if this.isVeryRecent}}very-recent-incident{{/if}}
+                      {{#if this.isRecent}}recent-incident{{/if}}">
                       <div class="col-9 col-sm-11 d-flex align-items-center">
                         <div class="py-2">
                           <div>
@@ -66,14 +69,14 @@
                             {{!-- BEGIN Columns used only for Heroku because we can see the current status of an incident --}}
                             {{#if this.isHerokuFeed}}
                               <div class="py-2">
-                                {{this.title}}
+                                <span class="incident-title">{{this.title}}</span>
                               </div>
                             {{/if}}
                             {{!-- END Columns used only for Heroku because we can see the current status of an incident --}}
                             {{!-- BEGIN Columns used only for Atlassian Feeds, no status state available--}}
                             {{#if this.isAtlassianFeed}}
                               <div class="py-2">
-                                {{this.title}}
+                                <span class="incident-title">{{this.title}}</span>
                               </div>
                             {{/if}}
                             {{!-- END Columns used only for Atlassian Feeds, no status state available--}}

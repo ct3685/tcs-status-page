@@ -49,3 +49,5 @@ exports
 .gitsha
 .vscode
 .mktoToken*
+example-*.xml
+example-*.json
