@@ -38,15 +38,21 @@
           <div class="card-header collapsed {{this.issueClassColor}}" data-toggle="collapse" href="#{{this.serviceId}}Status">
               <img class='mr-3' src="{{this.serviceLogo}}" height='50' width="50" alt="">
               <a class="card-title">{{this.serviceName}}</a>
-              {{#each (pullArray array=this.issues amount=1)}}
+              {{#if this.isServiceDown}}
                 <div class="mt-2">
-                  {{#if this}}
-                    Most Recent Incident occurred on {{this.pubDate}}
-                  {{else}}
-                    There have been no recent incidents.
-                  {{/if}}
+                  Unable to fetch status information
                 </div>
-              {{/each}}
+              {{else}}
+                {{#each (pullArray array=this.issues amount=1)}}
+                  <div class="mt-2">
+                    {{#if this}}
+                      Most Recent Incident occurred on {{this.pubDate}}
+                    {{else}}
+                      There have been no recent incidents.
+                    {{/if}}
+                  </div>
+                {{/each}}
+              {{/if}}
           </div>
           <div id="{{this.serviceId}}Status" class="card-body card-body-wrapper collapse" data-parent="#accordion">
             <div class="text-center">
@@ -58,7 +64,10 @@
               {{#if this.issues.length}}
                 {{#each (pullArray array=this.issues amount=5)}}
                   <div class="container">
-                    <div class="row my-auto incidents-wrapper">
+                    <div class="row my-auto incidents-wrapper 
+                      {{#if this.isFutureMaintenance}}maintenance-event{{/if}}
+                      {{#if this.isVeryRecent}}very-recent-incident{{/if}}
+                      {{#if this.isRecent}}recent-incident{{/if}}">
                       <div class="col-9 col-sm-11 d-flex align-items-center">
                         <div class="py-2">
                           <div>
@@ -66,14 +75,14 @@
                             {{!-- BEGIN Columns used only for Heroku because we can see the current status of an incident --}}
                             {{#if this.isHerokuFeed}}
                               <div class="py-2">
-                                {{this.title}}
+                                <span class="incident-title">{{this.title}}</span>
                               </div>
                             {{/if}}
                             {{!-- END Columns used only for Heroku because we can see the current status of an incident --}}
                             {{!-- BEGIN Columns used only for Atlassian Feeds, no status state available--}}
                             {{#if this.isAtlassianFeed}}
                               <div class="py-2">
-                                {{this.title}}
+                                <span class="incident-title">{{this.title}}</span>
                               </div>
                             {{/if}}
                             {{!-- END Columns used only for Atlassian Feeds, no status state available--}}

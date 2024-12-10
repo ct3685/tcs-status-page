@@ -16,3 +16,7 @@
 
 // 5. Pages
 @import "/pages/_home";
+
+.status-unknown {
+  background-color: #999 !important;  // or any color you prefer for unknown states
+}
