@@ -96,42 +96,6 @@
   &.status-green::after {
     color: rgb(58, 155, 58);
   }
-
-  &.status-blue {
-    background-color: rgba(0, 123, 255, 0.1);
-    border-left: 3px solid #007bff;
-    
-    &::after {
-      color: #007bff;
-    }
-  }
-
-  &.status-yellow {
-    background-color: rgba(255, 191, 0, 0.1);
-    border-left: 3px solid #ffbf00;
-    
-    &::after {
-      color: #ffbf00;
-    }
-  }
-
-  &.status-red {
-    background-color: rgba(255, 0, 0, 0.1);
-    border-left: 3px solid red;
-    
-    &::after {
-      color: red;
-    }
-  }
-
-  &.status-green {
-    background-color: rgba(58, 155, 58, 0.1);
-    border-left: 3px solid rgb(58, 155, 58);
-    
-    &::after {
-      color: rgb(58, 155, 58);
-    }
-  }
 }
 
 .card-title {
@@ -233,80 +197,8 @@
   color: $primary; /* Make sure $primary is defined */
 }
 
-// First define our color variables for consistency
-$status-colors: (
-  'green': rgb(58, 155, 58),
-  'blue': #007bff,
-  'yellow': #ffbf00,
-  'red': #ff0000
-);
-
-// Update the incidents-wrapper styles
 .incidents-wrapper {
   border-top: 1px solid #8c8c8c;
-  transition: background-color 0.2s ease;
-  
-  &.maintenance-event {
-    background-color: rgba(map-get($status-colors, 'blue'), 0.03);
-    border-left: 3px solid map-get($status-colors, 'blue');
-
-    .incident-title {
-      color: map-get($status-colors, 'blue');
-    }
-  }
-
-  &.recent-incident {
-    background-color: rgba(map-get($status-colors, 'yellow'), 0.03);
-    border-left: 3px solid map-get($status-colors, 'yellow');
-
-    .incident-title {
-      color: map-get($status-colors, 'yellow');
-    }
-  }
-
-  &.very-recent-incident {
-    background-color: rgba(map-get($status-colors, 'red'), 0.03);
-    border-left: 3px solid map-get($status-colors, 'red');
-
-    .incident-title {
-      color: map-get($status-colors, 'red');
-    }
-  }
-
-  // Add styles for normal state (no incidents)
-  &:not(.maintenance-event):not(.recent-incident):not(.very-recent-incident) {
-    background-color: rgba(map-get($status-colors, 'green'), 0.03);
-    border-left: 3px solid map-get($status-colors, 'green');
-
-    .incident-title {
-      color: map-get($status-colors, 'green');
-    }
-  }
-
-  // Add some hover effect
-  &:hover {
-    background-color: rgba(black, 0.02);
-  }
-}
-
-// Update the card header styles to use the same color variables
-.card-header {
-  // ... existing styles ...
-
-  @each $status, $color in $status-colors {
-    &.status-#{$status} {
-      background-color: rgba($color, 0.1);
-      border-left: 3px solid $color;
-      
-      &::after {
-        color: $color;
-      }
-
-      .card-title {
-        color: darken($color, 10%);
-      }
-    }
-  }
 }
 
 /* Add these styles to the existing file */
@@ -352,15 +244,4 @@ $status-colors: (
   .legend-icon-blue {
     font-size: 0.9rem;
   }
-}
-
-.maintenance-badge {
-  display: inline-block;
-  background-color: #007bff;
-  color: white;
-  font-size: 0.8rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 3px;
-  margin-left: 0.5rem;
-  vertical-align: middle;
 }

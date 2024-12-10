@@ -1,38 +1,20 @@
 {
   "env": {
-    "browser": true,
+  	"browser": true,
     "node": true,
     "es6": true,
     "jquery": true
   },
-  "extends": [
-    "airbnb-base",
-    "prettier"
-  ],
+  "extends": "airbnb-base",
   "rules": {
     "no-param-reassign": [2, { "props": false }],
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
-    "max-len": ["error", {
-      "comments": 200,
-      "code": 120,
-      "ignoreUrls": true,
-      "ignoreStrings": true
-    }],
+    "max-len": ["error", {"comments": 200, "code": 120, "ignoreUrls":true, "ignoreStrings": true}],
     "arrow-body-style": ["error", "as-needed"],
-    "import/no-extraneous-dependencies": ["error", {
-      "devDependencies": [
-        "webpack/**.js",
-        "test/**/**.js",
-        "migrations/**/**.js",
-        "build_scripts/**/**.js"
-      ]
-    }],
-    "quotes": ["error", "single"],
-    "comma-dangle": ["error", "always-multiline"],
-    "arrow-parens": ["error", "as-needed"]
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["webpack/**.js", "test/**/**.js", "migrations/**/**.js", "build_scripts/**/**.js"]}]
   },
   "parserOptions": {
-    "ecmaVersion": 2020,
+    "ecmaVersion": 8,
     "ecmaFeatures": {
       "legacyDecorators": true
     }
