@@ -13,10 +13,22 @@ const detail = async (req, res, next) => {
           {
             url,
             json: true,
+            timeout: 10000,
           },
           (error, response, body) => {
-            if (error || response.statusCode !== 200) {
+            if (error) {
+              console.error(`Heroku API request failed: ${error.message}`);
               return reject(error);
+            }
+            if (!response || response.statusCode !== 200) {
+              const statusError = new Error(`Invalid status code: ${response?.statusCode}`);
+              console.error(`Heroku API request failed: ${statusError.message}`);
+              return reject(statusError);
+            }
+            if (!body) {
+              const bodyError = new Error('Empty response body');
+              console.error(`Heroku API request failed: ${bodyError.message}`);
+              return reject(bodyError);
             }
             return resolve(body);
           },
@@ -27,10 +39,17 @@ const detail = async (req, res, next) => {
       try {
         return await promise;
       } catch (error) {
-        console.error(`Failed to fetch status for ${serviceName}:`, error);
+        const errorMessage = error.message || 'Unknown error';
+        console.error(`Failed to fetch status for ${serviceName}:`, {
+          service: serviceName,
+          error: errorMessage,
+          timestamp: new Date().toISOString(),
+          stack: error.stack
+        });
         return {
           items: [],
           error: true,
+          errorMessage: errorMessage
         };
       }
     };
@@ -222,37 +241,70 @@ const detail = async (req, res, next) => {
         return false;
       };
 
+      const safeParseDate = (dateString) => {
+        try {
+          const parsed = moment(dateString);
+          if (!parsed.isValid()) {
+            console.error(`Invalid date format for ${serviceDisplayName}: ${dateString}`);
+            return moment(); // fallback to current time
+          }
+          return parsed;
+        } catch (error) {
+          console.error(`Date parsing error for ${serviceDisplayName}:`, error);
+          return moment(); // fallback to current time
+        }
+      };
+
       const allIssues = feed.items
         ? feed.items
             .filter(issue => {
-              const content = issue.content?.text || issue.content || issue.description;
-              return !isNoIncidentMessage(issue.title, content) && !isMaintenanceEvent(issue);
+              try {
+                const content = issue.content?.text || issue.content || issue.description;
+                return !isNoIncidentMessage(issue.title, content) && !isMaintenanceEvent(issue);
+              } catch (error) {
+                console.error(`Filter error for ${serviceDisplayName}:`, error);
+                return false; // Skip problematic items
+              }
             })
             .map(issue => {
-              const date = issue.published || issue.isoDate;
-              const issueMoment = moment(date);
-              const content = issue.content?.text || issue.content || issue.description;
-              
-              return {
-                isAtlassianFeed: true,
-                id: new Date(date).getTime(),
-                pubDate: issueMoment.format('MMM DD, YYYY'),
-                pubTime: issueMoment.tz('America/Los_Angeles').format('HH:mm'),
-                title: issue.title,
-                fullUrl: issue.link || issue.url || issue.fullUrl,
-                content: content,
-                isoDate: date,
-                isVeryRecent: issueMoment.isAfter(moment().subtract(3, 'h')),
-                isRecent: issueMoment.isAfter(moment().subtract(24, 'h')),
-              };
+              try {
+                const date = issue.published || issue.isoDate;
+                const issueMoment = safeParseDate(date);
+                const content = issue.content?.text || issue.content || issue.description;
+                
+                return {
+                  isAtlassianFeed: true,
+                  id: new Date(date).getTime(),
+                  pubDate: issueMoment.format('MMM DD, YYYY'),
+                  pubTime: issueMoment.tz('America/Los_Angeles').format('HH:mm'),
+                  title: issue.title || 'Untitled Issue',
+                  fullUrl: issue.link || issue.url || issue.fullUrl || serviceURL,
+                  content: content || '',
+                  isoDate: date,
+                  isVeryRecent: issueMoment.isAfter(moment().subtract(3, 'h')),
+                  isRecent: issueMoment.isAfter(moment().subtract(24, 'h')),
+                };
+              } catch (error) {
+                console.error(`Mapping error for ${serviceDisplayName}:`, error);
+                return null;
+              }
             })
+            .filter(Boolean) // Remove any null entries from mapping errors
         : [];
 
-      const sortedCurrentIssues = _.orderBy(
-        allIssues,
-        ['isoDate'],
-        ['desc'],
-      ).slice(0, 5);
+      // Add error handling for sorting
+      const sortedCurrentIssues = (() => {
+        try {
+          return _.orderBy(
+            allIssues,
+            ['isoDate'],
+            ['desc'],
+          ).slice(0, 5);
+        } catch (error) {
+          console.error(`Sorting error for ${serviceDisplayName}:`, error);
+          return allIssues.slice(0, 5); // Fallback to unsorted
+        }
+      })();
 
       const statusColor = () => {
         if (sortedCurrentIssues.length > 0) {
@@ -413,12 +465,19 @@ const detail = async (req, res, next) => {
       ),
     };
 
-    const sortedServices = Object.keys(servicesObject)
-      .sort()
-      .reduce((obj, key) => {
-        obj[key] = servicesObject[key];
-        return obj;
-      }, {});
+    const sortedServices = (() => {
+      try {
+        return Object.keys(servicesObject)
+          .sort()
+          .reduce((obj, key) => {
+            obj[key] = servicesObject[key];
+            return obj;
+          }, {});
+      } catch (error) {
+        console.error('Error sorting services:', error);
+        return servicesObject; // Fallback to unsorted
+      }
+    })();
 
     res.locals.pageData = {
       services: sortedServices,
@@ -431,8 +490,9 @@ const detail = async (req, res, next) => {
       headerClass: 'custom-header-class',
     };
     next();
-  } catch (e) {
-    next(e);
+  } catch (error) {
+    console.error('Fatal error in detail controller:', error);
+    next(error);
   }
 };
 
