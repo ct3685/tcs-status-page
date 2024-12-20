@@ -185,3 +185,4 @@ const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName) => {
     console.log('MOMENT TYPEOF: ', typeof moment(herokuIssue.created_at, "MMMM"))
     console.log('Value of Object: ', moment(herokuIssue.created_at, "MMMM"))
 </code></pre>
+
