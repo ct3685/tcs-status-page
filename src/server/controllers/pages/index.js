@@ -56,6 +56,8 @@ const detail = async (req, res, next) => {
       safePromise(parser.parseURL('https://status.openai.com/history.rss'), 'OpenAI'),
       safePromise(parser.parseURL('https://status.upstash.com/history.rss'), 'Upstash'),
       safePromise(parser.parseURL('https://status.anthropic.com/history.rss'), 'Anthropic'),
+      safePromise(parser.parseURL('https://status.bitwarden.com/state_feed/feed'), 'Bitwarden'),
+      safePromise(parser.parseURL('https://status.lastpass.com/history.rss'), 'LastPass'),
     ];
 
     const [
@@ -79,6 +81,8 @@ const detail = async (req, res, next) => {
       openaiFeed,
       upstashFeed,
       anthropicFeed,
+      bitwardenFeed,
+      lastpassFeed,
     ] = await Promise.all(promiseArray);
 
     const normalizeHerokuFeed = (
@@ -175,58 +179,80 @@ const detail = async (req, res, next) => {
 
       const isMaintenanceEvent = issue => {
         const maintenanceKeywords = [
-          'maintenance',
-          'scheduled',
-          'planned',
-          'upgrade',
-          'update',
+          'scheduled maintenance',
+          'planned maintenance',
+          'maintenance window',
+          'service maintenance',
+          'emergency maintenance'
         ];
-        return (
-          moment(issue.isoDate).isAfter(currentTime) ||
-          maintenanceKeywords.some(keyword =>
-            issue.title.toLowerCase().includes(keyword) ||
-            (issue.description && issue.description.toLowerCase().includes(keyword)),
-          )
-        );
+
+        const content = issue.content?.text || issue.content || issue.description;
+        const date = issue.published || issue.isoDate;
+        const title = issue.title?.toLowerCase() || '';
+        
+        // If it has maintenanceEndDate and it's a maintenance-related title
+        if (issue.maintenanceEndDate && title.includes('maintenance')) {
+          return true;
+        }
+
+        // If it's explicitly a maintenance event
+        return maintenanceKeywords.some(keyword => title.includes(keyword));
+      };
+
+      const isNoIncidentMessage = (title, content) => {
+        // Only check the title for these phrases
+        const noIncidentTitlePhrases = [
+          'no incidents reported',
+          'all systems operational',
+          'operating normally',
+          'no known issues'
+        ];
+        
+        // Don't filter out issues just because they're resolved
+        const title_lower = title.toLowerCase();
+        if (noIncidentTitlePhrases.some(phrase => title_lower.includes(phrase))) {
+          return true;
+        }
+
+        // If it's an update to a maintenance event, filter it out
+        if (title_lower.startsWith('update') && content?.toLowerCase().includes('maintenance')) {
+          return true;
+        }
+
+        return false;
       };
 
       const allIssues = feed.items
-        ? feed.items.map(issue => {
-            const issueMoment = moment(issue.isoDate);
-            return {
-              isAtlassianFeed: true,
-              id: new Date(issue.isoDate).getTime(),
-              pubDate: issueMoment.format('MMM DD, YYYY'),
-              pubTime: issueMoment.tz('America/Los_Angeles').format('HH:mm'),
-              title: issue.title,
-              fullUrl: issue.fullUrl,
-              content: issue.content,
-              isoDate: issue.isoDate,
-              isFutureMaintenance: isMaintenanceEvent(issue),
-              isVeryRecent: issueMoment.isAfter(moment().subtract(3, 'h')),
-              isRecent: issueMoment.isAfter(moment().subtract(24, 'h')),
-            };
-          })
+        ? feed.items
+            .filter(issue => {
+              const content = issue.content?.text || issue.content || issue.description;
+              return !isNoIncidentMessage(issue.title, content) && !isMaintenanceEvent(issue);
+            })
+            .map(issue => {
+              const date = issue.published || issue.isoDate;
+              const issueMoment = moment(date);
+              const content = issue.content?.text || issue.content || issue.description;
+              
+              return {
+                isAtlassianFeed: true,
+                id: new Date(date).getTime(),
+                pubDate: issueMoment.format('MMM DD, YYYY'),
+                pubTime: issueMoment.tz('America/Los_Angeles').format('HH:mm'),
+                title: issue.title,
+                fullUrl: issue.link || issue.url || issue.fullUrl,
+                content: content,
+                isoDate: date,
+                isVeryRecent: issueMoment.isAfter(moment().subtract(3, 'h')),
+                isRecent: issueMoment.isAfter(moment().subtract(24, 'h')),
+              };
+            })
         : [];
 
-      const currentIssues = allIssues.filter(
-        issue => !issue.isFutureMaintenance,
-      );
-      const maintenanceEvents = allIssues.filter(
-        issue => issue.isFutureMaintenance,
-      );
-
       const sortedCurrentIssues = _.orderBy(
-        currentIssues,
+        allIssues,
         ['isoDate'],
         ['desc'],
       ).slice(0, 5);
-
-      const sortedMaintenanceEvents = _.orderBy(
-        maintenanceEvents,
-        ['isoDate'],
-        ['asc'],
-      ).slice(0, 2);
 
       const statusColor = () => {
         if (sortedCurrentIssues.length > 0) {
@@ -239,7 +265,6 @@ const detail = async (req, res, next) => {
             return 'status-yellow';
           }
         }
-
         return 'status-green';
       };
 
@@ -250,134 +275,153 @@ const detail = async (req, res, next) => {
         serviceURL,
         serviceLogo: `/images/${serviceIdName}Logo.png`,
         issues: sortedCurrentIssues,
-        maintenanceEvents: sortedMaintenanceEvents,
-        hasFutureMaintenance: sortedMaintenanceEvents.length > 0,
       };
     };
 
+    const servicesObject = {
+      anthropic: normalizeRssFeed(
+        anthropicFeed,
+        'Anthropic',
+        'anthropic',
+        'https://status.anthropic.com/',
+      ),
+      circleCi: normalizeRssFeed(
+        circleCi,
+        'Circle Ci',
+        'circleci',
+        'https://status.circleci.com/',
+      ),
+      cloudflare: normalizeRssFeed(
+        cloudflareFeed,
+        'Cloudflare',
+        'cloudflare',
+        'https://www.cloudflarestatus.com/',
+      ),
+      cloudways: normalizeRssFeed(
+        cloudways,
+        'Cloudways',
+        'cloudways',
+        'https://status.cloudways.com/',
+      ),
+      contentful: normalizeRssFeed(
+        contentfulFeed,
+        'Contentful',
+        'contentful',
+        'https://www.contentfulstatus.com/',
+      ),
+      envkey: normalizeRssFeed(
+        envkeyFeed,
+        'Envkey',
+        'envkey',
+        'https://status.envkey.com/',
+      ),
+      formAssembly: normalizeRssFeed(
+        formAssemblyFeed,
+        'Form Assembly',
+        'formassembly',
+        'https://status.formassembly.com/',
+      ),
+      github: normalizeRssFeed(
+        githubFeed,
+        'Github',
+        'github',
+        'https://www.githubstatus.com/',
+      ),
+      heroku: normalizeHerokuFeed(
+        herokuIssues,
+        'Heroku',
+        'heroku',
+        'https://status.heroku.com/',
+      ),
+      hubspot: normalizeRssFeed(
+        hubspotFeed,
+        'HubSpot',
+        'hubspot',
+        'https://status.hubspot.com/',
+      ),
+      jiraServiceDesk: normalizeRssFeed(
+        jiraServiceDesk,
+        'Jira Service Desk',
+        'jiraservicedesk',
+        'https://jira-service-desk.status.atlassian.com/',
+      ),
+      netlify: normalizeRssFeed(
+        netlify,
+        'Netlify',
+        'netlify',
+        'https://www.netlifystatus.com/',
+      ),
+      openai: normalizeRssFeed(
+        openaiFeed,
+        'OpenAI',
+        'openai',
+        'https://status.openai.com/',
+      ),
+      sendgrid: normalizeRssFeed(
+        sendgridFeed,
+        'Sendgrid',
+        'sendgrid',
+        'https://status.sendgrid.com/',
+      ),
+      sentry: normalizeRssFeed(
+        sentry,
+        'Sentry',
+        'sentry',
+        'https://status.sentry.io/',
+      ),
+      slack: normalizeRssFeed(
+        slackFeed,
+        'Slack',
+        'slack',
+        'https://status.slack.com/',
+      ),
+      tempo: normalizeRssFeed(
+        tempoFeed,
+        'Tempo',
+        'tempo',
+        'https://status.tempo.io/',
+      ),
+      upstash: normalizeRssFeed(
+        upstashFeed,
+        'Upstash',
+        'upstash',
+        'https://status.upstash.com/',
+      ),
+      vercel: normalizeRssFeed(
+        vercelFeed,
+        'Vercel',
+        'vercel',
+        'https://www.vercel-status.com/',
+      ),
+      zoom: normalizeRssFeed(
+        zoom,
+        'Zoom',
+        'zoom',
+        'https://status.zoom.us/',
+      ),
+      bitwarden: normalizeRssFeed(
+        bitwardenFeed,
+        'Bitwarden',
+        'bitwarden',
+        'https://status.bitwarden.com/',
+      ),
+      lastpass: normalizeRssFeed(
+        lastpassFeed,
+        'LastPass',
+        'lastpass',
+        'https://status.lastpass.com/',
+      ),
+    };
+
+    const sortedServices = Object.keys(servicesObject)
+      .sort()
+      .reduce((obj, key) => {
+        obj[key] = servicesObject[key];
+        return obj;
+      }, {});
+
     res.locals.pageData = {
-      services: {
-        anthropic: normalizeRssFeed(
-          anthropicFeed,
-          'Anthropic',
-          'anthropic',
-          'https://status.anthropic.com/',
-        ),
-        circleCi: normalizeRssFeed(
-          circleCi,
-          'Circle Ci',
-          'circleci',
-          'https://status.circleci.com/',
-        ),
-        cloudflare: normalizeRssFeed(
-          cloudflareFeed,
-          'Cloudflare',
-          'cloudflare',
-          'https://www.cloudflarestatus.com/',
-        ),
-        cloudways: normalizeRssFeed(
-          cloudways,
-          'Cloudways',
-          'cloudways',
-          'https://status.cloudways.com/',
-        ),
-        contentful: normalizeRssFeed(
-          contentfulFeed,
-          'Contentful',
-          'contentful',
-          'https://www.contentfulstatus.com/',
-        ),
-        envkey: normalizeRssFeed(
-          envkeyFeed,
-          'Envkey',
-          'envkey',
-          'https://status.envkey.com/',
-        ),
-        formAssembly: normalizeRssFeed(
-          formAssemblyFeed,
-          'Form Assembly',
-          'formassembly',
-          'https://status.formassembly.com/',
-        ),
-        github: normalizeRssFeed(
-          githubFeed,
-          'Github',
-          'github',
-          'https://www.githubstatus.com/',
-        ),
-        heroku: normalizeHerokuFeed(
-          herokuIssues,
-          'Heroku',
-          'heroku',
-          'https://status.heroku.com/',
-        ),
-        hubspot: normalizeRssFeed(
-          hubspotFeed,
-          'HubSpot',
-          'hubspot',
-          'https://status.hubspot.com/',
-        ),
-        jiraServiceDesk: normalizeRssFeed(
-          jiraServiceDesk,
-          'Jira Service Desk',
-          'jiraservicedesk',
-          'https://jira-service-desk.status.atlassian.com/',
-        ),
-        netlify: normalizeRssFeed(
-          netlify,
-          'Netlify',
-          'netlify',
-          'https://www.netlifystatus.com/',
-        ),
-        openai: normalizeRssFeed(
-          openaiFeed,
-          'OpenAI',
-          'openai',
-          'https://status.openai.com/',
-        ),
-        sendgrid: normalizeRssFeed(
-          sendgridFeed,
-          'Sendgrid',
-          'sendgrid',
-          'https://status.sendgrid.com/',
-        ),
-        sentry: normalizeRssFeed(
-          sentry,
-          'Sentry',
-          'sentry',
-          'https://status.sentry.io/',
-        ),
-        slack: normalizeRssFeed(
-          slackFeed,
-          'Slack',
-          'slack',
-          'https://status.slack.com/',
-        ),
-        tempo: normalizeRssFeed(
-          tempoFeed,
-          'Tempo',
-          'tempo',
-          'https://status.tempo.io/',
-        ),
-        upstash: normalizeRssFeed(
-          upstashFeed,
-          'Upstash',
-          'upstash',
-          'https://status.upstash.com/',
-        ),
-        vercel: normalizeRssFeed(
-          vercelFeed,
-          'Vercel',
-          'vercel',
-          'https://www.vercel-status.com/',
-        ),
-        zoom: normalizeRssFeed(
-          zoom,
-          'Zoom',
-          'zoom',
-          'https://status.zoom.us/',
-        ),
-      },
+      services: sortedServices,
     };
 
     res.locals.view = 'index';
