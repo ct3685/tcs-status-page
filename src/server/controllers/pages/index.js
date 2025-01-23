@@ -77,6 +77,7 @@ const detail = async (req, res, next) => {
       safePromise(parser.parseURL('https://status.anthropic.com/history.rss'), 'Anthropic'),
       safePromise(parser.parseURL('https://status.bitwarden.com/state_feed/feed'), 'Bitwarden'),
       safePromise(parser.parseURL('https://status.lastpass.com/history.rss'), 'LastPass'),
+      safePromise(parser.parseURL('https://status.smartling.com/history.rss'), 'Smartling'),
     ];
 
     const [
@@ -102,6 +103,7 @@ const detail = async (req, res, next) => {
       anthropicFeed,
       bitwardenFeed,
       lastpassFeed,
+      smartlingFeed,
     ] = await Promise.all(promiseArray);
 
     const normalizeHerokuFeed = (
@@ -462,6 +464,12 @@ const detail = async (req, res, next) => {
         'LastPass',
         'lastpass',
         'https://status.lastpass.com/',
+      ),
+      smartling: normalizeRssFeed(
+        smartlingFeed,
+        'Smartling',
+        'smartling',
+        'https://status.smartling.com/',
       ),
     };
 
