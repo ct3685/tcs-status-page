@@ -44,12 +44,12 @@ const detail = async (req, res, next) => {
           service: serviceName,
           error: errorMessage,
           timestamp: new Date().toISOString(),
-          stack: error.stack
+          stack: error.stack,
         });
         return {
           items: [],
           error: true,
-          errorMessage: errorMessage
+          errorMessage: errorMessage,
         };
       }
     };
@@ -71,7 +71,6 @@ const detail = async (req, res, next) => {
       safePromise(parser.parseURL('https://status.slack.com/feed/rss'), 'Slack'),
       safePromise(parser.parseURL('https://www.vercel-status.com/history.rss'), 'Vercel'),
       safePromise(parser.parseURL('https://status.sendgrid.com/history.rss'), 'Sendgrid'),
-      safePromise(parser.parseURL('https://status.envkey.com/history.rss'), 'Envkey'),
       safePromise(parser.parseURL('https://status.openai.com/history.rss'), 'OpenAI'),
       safePromise(parser.parseURL('https://status.upstash.com/history.rss'), 'Upstash'),
       safePromise(parser.parseURL('https://status.anthropic.com/history.rss'), 'Anthropic'),
@@ -97,7 +96,6 @@ const detail = async (req, res, next) => {
       slackFeed,
       vercelFeed,
       sendgridFeed,
-      envkeyFeed,
       openaiFeed,
       upstashFeed,
       anthropicFeed,
@@ -106,12 +104,7 @@ const detail = async (req, res, next) => {
       smartlingFeed,
     ] = await Promise.all(promiseArray);
 
-    const normalizeHerokuFeed = (
-      feed,
-      serviceDisplayName,
-      serviceIdName,
-      serviceURL,
-    ) => {
+    const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName, serviceURL) => {
       if (feed.error) {
         return {
           issueClassColor: 'status-unknown',
@@ -154,9 +147,7 @@ const detail = async (req, res, next) => {
           isHerokuFeed: true,
           id: herokuIssue.id,
           pubDate: moment(herokuIssue.created_at).format('MMM DD, YYYY'),
-          pubTime: moment(herokuIssue.created_at)
-            .tz('America/Los_Angeles')
-            .format('HH:mm'),
+          pubTime: moment(herokuIssue.created_at).tz('America/Los_Angeles').format('HH:mm'),
           title: herokuIssue.title,
           state: herokuIssue.state,
           fullUrl: herokuIssue.full_url,
@@ -166,9 +157,7 @@ const detail = async (req, res, next) => {
         _.each(herokuIssue.updates, updates => {
           const updateIssue = {
             pubDate: moment(updates.created_at).format('MMM DD,'),
-            pubTime: moment(updates.created_at)
-              .tz('America/Los_Angeles')
-              .format('HH:mm'),
+            pubTime: moment(updates.created_at).tz('America/Los_Angeles').format('HH:mm'),
             title: updates.contents,
             state: updates.update_type,
           };
@@ -204,13 +193,13 @@ const detail = async (req, res, next) => {
           'planned maintenance',
           'maintenance window',
           'service maintenance',
-          'emergency maintenance'
+          'emergency maintenance',
         ];
 
         const content = issue.content?.text || issue.content || issue.description;
         const date = issue.published || issue.isoDate;
         const title = issue.title?.toLowerCase() || '';
-        
+
         // If it has maintenanceEndDate and it's a maintenance-related title
         if (issue.maintenanceEndDate && title.includes('maintenance')) {
           return true;
@@ -226,9 +215,9 @@ const detail = async (req, res, next) => {
           'no incidents reported',
           'all systems operational',
           'operating normally',
-          'no known issues'
+          'no known issues',
         ];
-        
+
         // Don't filter out issues just because they're resolved
         const title_lower = title.toLowerCase();
         if (noIncidentTitlePhrases.some(phrase => title_lower.includes(phrase))) {
@@ -243,7 +232,7 @@ const detail = async (req, res, next) => {
         return false;
       };
 
-      const safeParseDate = (dateString) => {
+      const safeParseDate = dateString => {
         try {
           const parsed = moment(dateString);
           if (!parsed.isValid()) {
@@ -273,7 +262,7 @@ const detail = async (req, res, next) => {
                 const date = issue.published || issue.isoDate;
                 const issueMoment = safeParseDate(date);
                 const content = issue.content?.text || issue.content || issue.description;
-                
+
                 return {
                   isAtlassianFeed: true,
                   id: new Date(date).getTime(),
@@ -297,11 +286,7 @@ const detail = async (req, res, next) => {
       // Add error handling for sorting
       const sortedCurrentIssues = (() => {
         try {
-          return _.orderBy(
-            allIssues,
-            ['isoDate'],
-            ['desc'],
-          ).slice(0, 5);
+          return _.orderBy(allIssues, ['isoDate'], ['desc']).slice(0, 5);
         } catch (error) {
           console.error(`Sorting error for ${serviceDisplayName}:`, error);
           return allIssues.slice(0, 5); // Fallback to unsorted
@@ -311,7 +296,7 @@ const detail = async (req, res, next) => {
       const statusColor = () => {
         if (sortedCurrentIssues.length > 0) {
           const mostRecentIncident = sortedCurrentIssues[0];
-          
+
           if (moment(mostRecentIncident.isoDate).isAfter(moment().subtract(3, 'h'))) {
             return 'status-red';
           }
@@ -333,144 +318,38 @@ const detail = async (req, res, next) => {
     };
 
     const servicesObject = {
-      anthropic: normalizeRssFeed(
-        anthropicFeed,
-        'Anthropic',
-        'anthropic',
-        'https://status.anthropic.com/',
-      ),
-      circleCi: normalizeRssFeed(
-        circleCi,
-        'Circle Ci',
-        'circleci',
-        'https://status.circleci.com/',
-      ),
-      cloudflare: normalizeRssFeed(
-        cloudflareFeed,
-        'Cloudflare',
-        'cloudflare',
-        'https://www.cloudflarestatus.com/',
-      ),
-      cloudways: normalizeRssFeed(
-        cloudways,
-        'Cloudways',
-        'cloudways',
-        'https://status.cloudways.com/',
-      ),
-      contentful: normalizeRssFeed(
-        contentfulFeed,
-        'Contentful',
-        'contentful',
-        'https://www.contentfulstatus.com/',
-      ),
-      envkey: normalizeRssFeed(
-        envkeyFeed,
-        'Envkey',
-        'envkey',
-        'https://status.envkey.com/',
-      ),
+      anthropic: normalizeRssFeed(anthropicFeed, 'Anthropic', 'anthropic', 'https://status.anthropic.com/'),
+      circleCi: normalizeRssFeed(circleCi, 'Circle Ci', 'circleci', 'https://status.circleci.com/'),
+      cloudflare: normalizeRssFeed(cloudflareFeed, 'Cloudflare', 'cloudflare', 'https://www.cloudflarestatus.com/'),
+      cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways', 'https://status.cloudways.com/'),
+      contentful: normalizeRssFeed(contentfulFeed, 'Contentful', 'contentful', 'https://www.contentfulstatus.com/'),
       formAssembly: normalizeRssFeed(
         formAssemblyFeed,
         'Form Assembly',
         'formassembly',
         'https://status.formassembly.com/',
       ),
-      github: normalizeRssFeed(
-        githubFeed,
-        'Github',
-        'github',
-        'https://www.githubstatus.com/',
-      ),
-      heroku: normalizeHerokuFeed(
-        herokuIssues,
-        'Heroku',
-        'heroku',
-        'https://status.heroku.com/',
-      ),
-      hubspot: normalizeRssFeed(
-        hubspotFeed,
-        'HubSpot',
-        'hubspot',
-        'https://status.hubspot.com/',
-      ),
+      github: normalizeRssFeed(githubFeed, 'Github', 'github', 'https://www.githubstatus.com/'),
+      heroku: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),
+      hubspot: normalizeRssFeed(hubspotFeed, 'HubSpot', 'hubspot', 'https://status.hubspot.com/'),
       jiraServiceDesk: normalizeRssFeed(
         jiraServiceDesk,
         'Jira Service Desk',
         'jiraservicedesk',
         'https://jira-service-desk.status.atlassian.com/',
       ),
-      netlify: normalizeRssFeed(
-        netlify,
-        'Netlify',
-        'netlify',
-        'https://www.netlifystatus.com/',
-      ),
-      openai: normalizeRssFeed(
-        openaiFeed,
-        'OpenAI',
-        'openai',
-        'https://status.openai.com/',
-      ),
-      sendgrid: normalizeRssFeed(
-        sendgridFeed,
-        'Sendgrid',
-        'sendgrid',
-        'https://status.sendgrid.com/',
-      ),
-      sentry: normalizeRssFeed(
-        sentry,
-        'Sentry',
-        'sentry',
-        'https://status.sentry.io/',
-      ),
-      slack: normalizeRssFeed(
-        slackFeed,
-        'Slack',
-        'slack',
-        'https://status.slack.com/',
-      ),
-      tempo: normalizeRssFeed(
-        tempoFeed,
-        'Tempo',
-        'tempo',
-        'https://status.tempo.io/',
-      ),
-      upstash: normalizeRssFeed(
-        upstashFeed,
-        'Upstash',
-        'upstash',
-        'https://status.upstash.com/',
-      ),
-      vercel: normalizeRssFeed(
-        vercelFeed,
-        'Vercel',
-        'vercel',
-        'https://www.vercel-status.com/',
-      ),
-      zoom: normalizeRssFeed(
-        zoom,
-        'Zoom',
-        'zoom',
-        'https://status.zoom.us/',
-      ),
-      bitwarden: normalizeRssFeed(
-        bitwardenFeed,
-        'Bitwarden',
-        'bitwarden',
-        'https://status.bitwarden.com/',
-      ),
-      lastpass: normalizeRssFeed(
-        lastpassFeed,
-        'LastPass',
-        'lastpass',
-        'https://status.lastpass.com/',
-      ),
-      smartling: normalizeRssFeed(
-        smartlingFeed,
-        'Smartling',
-        'smartling',
-        'https://status.smartling.com/',
-      ),
+      netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify', 'https://www.netlifystatus.com/'),
+      openai: normalizeRssFeed(openaiFeed, 'OpenAI', 'openai', 'https://status.openai.com/'),
+      sendgrid: normalizeRssFeed(sendgridFeed, 'Sendgrid', 'sendgrid', 'https://status.sendgrid.com/'),
+      sentry: normalizeRssFeed(sentry, 'Sentry', 'sentry', 'https://status.sentry.io/'),
+      slack: normalizeRssFeed(slackFeed, 'Slack', 'slack', 'https://status.slack.com/'),
+      tempo: normalizeRssFeed(tempoFeed, 'Tempo', 'tempo', 'https://status.tempo.io/'),
+      upstash: normalizeRssFeed(upstashFeed, 'Upstash', 'upstash', 'https://status.upstash.com/'),
+      vercel: normalizeRssFeed(vercelFeed, 'Vercel', 'vercel', 'https://www.vercel-status.com/'),
+      zoom: normalizeRssFeed(zoom, 'Zoom', 'zoom', 'https://status.zoom.us/'),
+      bitwarden: normalizeRssFeed(bitwardenFeed, 'Bitwarden', 'bitwarden', 'https://status.bitwarden.com/'),
+      lastpass: normalizeRssFeed(lastpassFeed, 'LastPass', 'lastpass', 'https://status.lastpass.com/'),
+      smartling: normalizeRssFeed(smartlingFeed, 'Smartling', 'smartling', 'https://status.smartling.com/'),
     };
 
     const sortedServices = (() => {
