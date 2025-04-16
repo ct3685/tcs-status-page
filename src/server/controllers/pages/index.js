@@ -351,7 +351,7 @@ const detail = async (req, res, next) => {
         'https://status.formassembly.com/',
       ),
       github: normalizeRssFeed(githubFeed, 'Github', 'github', 'https://www.githubstatus.com/'),
-      heroku: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),
+      // heroku: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku', 'https://status.heroku.com/'),
       hubspot: normalizeRssFeed(hubspotFeed, 'HubSpot', 'hubspot', 'https://status.hubspot.com/'),
       jiraServiceDesk: normalizeRssFeed(
         jiraServiceDesk,
