@@ -188,25 +188,37 @@ const detail = async (req, res, next) => {
       const currentTime = moment();
 
       const isMaintenanceEvent = issue => {
-        const maintenanceKeywords = [
-          'scheduled maintenance',
-          'planned maintenance',
-          'maintenance window',
-          'service maintenance',
-          'emergency maintenance',
-        ];
+        try {
+          const maintenanceKeywords = [
+            'scheduled maintenance',
+            'planned maintenance',
+            'maintenance window',
+            'service maintenance',
+            'emergency maintenance',
+            'this is a scheduled event',
+          ];
 
-        const content = issue.content?.text || issue.content || issue.description;
-        const date = issue.published || issue.isoDate;
-        const title = issue.title?.toLowerCase() || '';
+          // Check for maintenanceEndDate which is directly from the RSS feed
+          if (issue.maintenanceEndDate) {
+            return true;
+          }
 
-        // If it has maintenanceEndDate and it's a maintenance-related title
-        if (issue.maintenanceEndDate && title.includes('maintenance')) {
-          return true;
+          const content = issue.content?.text || issue.content || issue.description;
+          const title = issue.title?.toLowerCase() || '';
+
+          // Check if the title contains maintenance keywords
+          if (title.includes('maintenance') || title.includes('on 2025-04-22') || title.includes('on 2025-04-')) {
+            return true;
+          }
+
+          // If it's explicitly a maintenance event
+          return maintenanceKeywords.some(
+            keyword => title.includes(keyword) || (content && content.toLowerCase().includes(keyword)),
+          );
+        } catch (error) {
+          console.error('Error in isMaintenanceEvent:', error);
+          return false;
         }
-
-        // If it's explicitly a maintenance event
-        return maintenanceKeywords.some(keyword => title.includes(keyword));
       };
 
       const isNoIncidentMessage = (title, content) => {
@@ -251,7 +263,16 @@ const detail = async (req, res, next) => {
             .filter(issue => {
               try {
                 const content = issue.content?.text || issue.content || issue.description;
-                return !isNoIncidentMessage(issue.title, content) && !isMaintenanceEvent(issue);
+
+                // Filter out maintenance events AND no incident messages
+                if (isNoIncidentMessage(issue.title, content) || isMaintenanceEvent(issue)) {
+                  if (isMaintenanceEvent(issue)) {
+                    console.log(`Filtering out maintenance event: ${issue.title}`);
+                  }
+                  return false;
+                }
+
+                return true;
               } catch (error) {
                 console.error(`Filter error for ${serviceDisplayName}:`, error);
                 return false; // Skip problematic items
@@ -272,8 +293,8 @@ const detail = async (req, res, next) => {
                   fullUrl: issue.link || issue.url || issue.fullUrl || serviceURL,
                   content: content || '',
                   isoDate: date,
-                  isVeryRecent: issueMoment.isAfter(moment().subtract(3, 'h')),
-                  isRecent: issueMoment.isAfter(moment().subtract(24, 'h')),
+                  isVeryRecent: issueMoment.isAfter(moment().subtract(3, 'h')) && issueMoment.isBefore(moment()),
+                  isRecent: issueMoment.isAfter(moment().subtract(24, 'h')) && issueMoment.isBefore(moment()),
                 };
               } catch (error) {
                 console.error(`Mapping error for ${serviceDisplayName}:`, error);

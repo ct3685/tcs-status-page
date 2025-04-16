@@ -5,32 +5,32 @@
   font-variant: normal;
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
-  font-family: "FontAwesome";
+  font-family: 'FontAwesome';
   margin-right: 1rem;
 }
 
 /* Specific Color Icons */
 .legend-icon-blue::before {
-  font-family: "FontAwesome";
-  content: "\f062";
+  font-family: 'FontAwesome';
+  content: '\f062';
   color: blue;
   margin-right: 1rem;
 }
 .legend-icon-yellow::before {
-  font-family: "FontAwesome";
-  content: "\f062";
+  font-family: 'FontAwesome';
+  content: '\f062';
   color: #ffbf00;
   margin-right: 1rem;
 }
 .legend-icon-red::before {
-  font-family: "FontAwesome";
-  content: "\f062";
+  font-family: 'FontAwesome';
+  content: '\f062';
   color: red;
   margin-right: 1rem;
 }
 .legend-icon-green::before {
-  font-family: "FontAwesome";
-  content: "\f062";
+  font-family: 'FontAwesome';
+  content: '\f062';
   color: rgb(58, 155, 58);
   margin-right: 1rem;
 }
@@ -65,20 +65,20 @@
   position: relative;
 
   &::after {
-    content: "\f063"; /* Default icon */
+    content: '\f063'; /* Default icon */
     right: 2rem;
     top: 1.35rem;
   }
 
   &.collapsed::after {
-    content: "\f062"; /* Collapsed icon */
+    content: '\f062'; /* Collapsed icon */
   }
 
   &.status-blue::after,
   &.status-yellow::after,
   &.status-red::after,
   &.status-green::after {
-    font-family: "FontAwesome";
+    font-family: 'FontAwesome';
     position: absolute;
     right: 2rem;
     top: 1.35rem;
@@ -100,7 +100,7 @@
   &.status-blue {
     background-color: rgba(0, 123, 255, 0.1);
     border-left: 3px solid #007bff;
-    
+
     &::after {
       color: #007bff;
     }
@@ -109,7 +109,7 @@
   &.status-yellow {
     background-color: rgba(255, 191, 0, 0.1);
     border-left: 3px solid #ffbf00;
-    
+
     &::after {
       color: #ffbf00;
     }
@@ -118,7 +118,7 @@
   &.status-red {
     background-color: rgba(255, 0, 0, 0.1);
     border-left: 3px solid red;
-    
+
     &::after {
       color: red;
     }
@@ -127,7 +127,7 @@
   &.status-green {
     background-color: rgba(58, 155, 58, 0.1);
     border-left: 3px solid rgb(58, 155, 58);
-    
+
     &::after {
       color: rgb(58, 155, 58);
     }
@@ -176,7 +176,7 @@
   }
 
   &::after {
-    content: "-";
+    content: '-';
     position: relative;
     top: -0.15rem;
   }
@@ -184,7 +184,7 @@
   &.collapsed::after {
     position: relative;
     top: -0.15rem;
-    content: "+";
+    content: '+';
   }
 }
 
@@ -238,14 +238,14 @@ $status-colors: (
   'green': rgb(58, 155, 58),
   'blue': #007bff,
   'yellow': #ffbf00,
-  'red': #ff0000
+  'red': #ff0000,
 );
 
 // Update the incidents-wrapper styles
 .incidents-wrapper {
   border-top: 1px solid #8c8c8c;
   transition: background-color 0.2s ease;
-  
+
   &.maintenance-event {
     background-color: rgba(map-get($status-colors, 'blue'), 0.03);
     border-left: 3px solid map-get($status-colors, 'blue');
@@ -297,7 +297,7 @@ $status-colors: (
     &.status-#{$status} {
       background-color: rgba($color, 0.1);
       border-left: 3px solid $color;
-      
+
       &::after {
         color: $color;
       }
