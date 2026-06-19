@@ -1,0 +1,30 @@
+{
+  "projects": [
+    {
+      "platform": "vercel|netlify",
+      "projectName": "firstProjectName",
+      "bwsProjectIds": {
+        "prod": "yourBWSProdProjectID",
+        "dev": "yourBWSDevProjectID",
+        "local": "yourBWSLocalProjectID"
+      },
+      "preserveVars": ["BWS_ACCESS_TOKEN"],
+      "excludeVars": [
+        "VERCEL_URL"
+      ]
+    },
+    {
+      "platform": "vercel|netlify",
+      "projectName": "secondProjectName",
+      "bwsProjectIds": {
+        "prod": "yourBWSProdProjectID",
+        "dev": "yourBWSDevProjectID",
+        "local": "yourBWSLocalProjectID"
+      },
+      "preserveVars": ["BWS_ACCESS_TOKEN"],
+      "excludeVars": [
+        "DEPLOY_URL"
+      ]
+    }
+  ]
+}

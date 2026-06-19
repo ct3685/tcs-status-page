@@ -19,7 +19,12 @@
     "seed": "tsx --env-file=.env scripts/seed-sanity.ts",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "secure-run": "node ./scripts/bws-secure/secureRun.js",
+    "list-projects": "node ./scripts/bws-secure/list-projects.js",
+    "bws-deps": "[ -d node_modules/dotenv ] && [ -d node_modules/dotenv-cli ] && [ -f node_modules/.bin/bws ] || npm install",
+    "bws-update": "rm -rf scripts/bws-secure && git clone git@github.com:last-rev-llc/bws-secure.git scripts/bws-secure && rm -rf scripts/bws-secure/.git && bash scripts/bws-secure/install.sh",
+    "postinstall": "sh ./scripts/bws-secure/bws-installer.sh"
   },
   "license": "UNLICENSED",
   "dependencies": {
@@ -62,6 +67,11 @@
     "prettier": "^3.8.4",
     "tsx": "^4.22.4",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.9",
+    "dotenv": "^17.4.2",
+    "dotenv-cli": "^11.0.0",
+    "yargs": "^18.0.0",
+    "glob": "^13.0.6",
+    "axios": "^1.15.1"
   }
 }

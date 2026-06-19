@@ -47,3 +47,10 @@ sanity/dist
 .idea
 example-*.xml
 example-*.json
+ 
+# BWS Secure
+.env.*
+.env.secure.*
+requiredVars.env
+.env-debug.html
+.bwsconfig.cache

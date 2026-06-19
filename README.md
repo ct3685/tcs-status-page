@@ -135,3 +135,73 @@ scripts/seed-sanity.ts   # seeding
 1. Verify the Netlify deploy + scheduled refresh + Studio edits.
 2. Point `status.lastrev.com` DNS at Netlify; keep the Heroku app running until verified.
 3. Decommission Heroku once traffic is confirmed on Netlify.
+
+<!-- BWS-SECURE-DOCS-START -->
+## 🔒 BWS Secure Environmental Variable Integration
+
+This project uses [BWS Secure](https://github.com/last-rev-llc/bws-secure) for managing environment variables across different environments.
+
+### 🔐 Creating an Access Token
+
+📍 **1.** Visit the [Bitwarden Machine Accounts](https://vault.bitwarden.com/#/sm) section within your Vault.
+   - If you login directly to https://vault.bitwarden.com, you will need to navigate to the Machine Accounts section, within the Secrets Manager. The Secrets Manager is located in the left sidebar, typically at the bottom of the page.
+   - If you don't have access, please refer to the [BWS Secure documentation](https://github.com/last-rev-llc/bws-secure) or contact your team administrator
+
+🖱️ **2.** Navigate to the Machine Accounts section, and follow these steps:
+   - Select the appropriate Client/Set of Machine Accounts from the list
+   - Click on the "Access Tokens" tab
+   - Click "+ New Access Token" button
+   - Give the token a meaningful name (e.g., "Your Name - Local Development")
+   - Click "Save" to generate the token
+
+📋 **3.** Copy the displayed token (you won't be able to see it again after closing)
+
+💾 **4.** Add it to your .env file in your project root:
+   ```
+   BWS_ACCESS_TOKEN=your_token_here
+   ```
+
+⚠️ **5.** Never commit this token to version control
+
+### 🎯 Token and project options
+
+- **BWS_ACCESS_TOKEN**: Required to load secrets from Bitwarden (scoped to your machine account).
+- **BWS_PROJECT_ID** (optional): Restrict to one or more BWS **project UUIDs**. Use a **single** UUID, or **comma-separated UUIDs** to merge projects (later IDs win when the same key exists in more than one project). Omit to use `bwsconfig.json` / project selection. Fully backward compatible with single-UUID setups.
+
+**Single project:**
+```
+BWS_PROJECT_ID=00000000-0000-0000-0000-000000000001
+```
+
+**Multiple projects (optional):**
+```
+BWS_PROJECT_ID=00000000-0000-0000-0000-000000000001, 11111111-1111-1111-1111-111111111111
+```
+
+More detail: [Multi-project ID guide](https://github.com/last-rev-llc/bws-secure/blob/main/guides/MULTI_PROJECT_ID_GUIDE.md).
+
+### Transient `.env.secure` files
+
+Encrypted `.env.secure` / `.env.secure.*` files in the repo root are **removed when each run finishes** (after your command runs; secrets are already in the process environment). Set **`BWS_KEEP_SECURE_FILES=true`** only when you need to inspect those files.
+
+### 🔧 Common Issues & Troubleshooting
+
+- **"No projects found"**: Verify your token has project access permissions in Bitwarden
+- **"Access denied"**: Check that the Machine Account has read permissions for the target projects
+- **Token not working**: Ensure no extra spaces when copying from Bitwarden
+- **Multiple projects / overlays**: Order matters for duplicate keys—see the multi-project guide above
+
+### Updating BWS Secure
+
+To update BWS Secure to the latest version, you can use the convenient script that was added to your package.json:
+
+```bash
+npm run bws-update  # Or: yarn bws-update, pnpm bws-update
+```
+
+Alternatively, from your project root:
+
+```bash
+rm -rf scripts/bws-secure && git clone git@github.com:last-rev-llc/bws-secure.git scripts/bws-secure && rm -rf scripts/bws-secure/.git && bash scripts/bws-secure/install.sh
+```
+<!-- BWS-SECURE-DOCS-END -->
