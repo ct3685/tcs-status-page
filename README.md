@@ -1,187 +1,137 @@
-## The Status Page
+# Last Rev Services Status
 
-Clone this repo
+A fast, high-clarity status dashboard for the third-party services Last Rev depends on.
+It answers "is anything broken or degraded right now?" at a glance, surfaces active
+incidents, and shows scheduled maintenance without letting it overwhelm the service health view.
 
-Download Dependencies
+- **Live:** https://lr-status-page.netlify.app (→ status.lastrev.com after cutover)
+- **Studio:** https://lr-status-page.netlify.app/studio
+- **Status API:** https://lr-status-page.netlify.app/api/status
+
+## Architecture
+
+```mermaid
+flowchart LR
+  cron["Netlify Scheduled Fn (every 3m)"] --> pipe["fetch + normalize + classify"]
+  sanity["Sanity: service config + manual incidents"] --> pipe
+  pipe --> blobs["Netlify Blobs: StatusSnapshot"]
+  blobs --> page["Next.js App Router (RSC)"]
+  sanity -->|webhook| reval["/api/revalidate"]
+  reval --> pipe
+  page --> user["Browser"]
 ```
-nvm use 14.17.0
-npm install
+
+- **Next.js 16 (App Router) + React 19 + TypeScript** on **Netlify** (OpenNext plugin).
+- **Sanity** is the source of truth for service config, categories, settings, and manual incidents.
+- A **Netlify Scheduled Function** polls all feeds every ~3 minutes, normalizes them, and writes a
+  single snapshot to **Netlify Blobs**. The page reads that snapshot (no per-request fan-out to 20+
+  upstream status pages). If no Blob exists (local dev / cold start) it computes on demand.
+- **MUI v9** dark theme; Server Components by default with minimal client JS for filters/accordions.
+
+### Status model
+
+Feeds (RSS/Atom, Atlassian Statuspage, Heroku API, manual) are normalized into a typed
+`StatusSnapshot` (`src/lib/status/types.ts`). Color is never the only signal — every state pairs a
+color with an icon and label.
+
+| Tone                | Meaning                                            |
+| ------------------- | -------------------------------------------------- |
+| Green (operational) | No recent incident, no active maintenance          |
+| Yellow (degraded)   | Incident within the recent window (default 24h)    |
+| Red (outage)        | Active outage or very recent incident (default 3h) |
+| Blue (maintenance)  | Scheduled or active maintenance                    |
+| Gray (unknown)      | Disabled, no data, or feed fetch failed            |
+
+## Prerequisites
+
+- **Node 24 LTS** (`.nvmrc` → `nvm use`)
+- **pnpm 11** (via Corepack: `corepack enable`)
+
+## Local development
+
+```bash
+nvm use            # Node 24
+corepack enable    # pnpm 11
+pnpm install
+cp .env.example .env   # then fill in the values (see below)
+pnpm dev               # http://localhost:3000  (Studio at /studio)
 ```
 
-Start Application
+### Environment variables
+
+| Variable                         | Scope  | Purpose                                                   |
+| -------------------------------- | ------ | --------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`           | public | Canonical URL, OG tags, sitemap, robots                   |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID`  | public | Sanity project (`512px0vg`)                               |
+| `NEXT_PUBLIC_SANITY_DATASET`     | public | Sanity dataset (`production`)                             |
+| `NEXT_PUBLIC_SANITY_API_VERSION` | public | Sanity API version                                        |
+| `SANITY_READ_TOKEN`              | server | Read token (dataset is private); also used by `pnpm seed` |
+| `SANITY_REVALIDATE_SECRET`       | server | Guards `/api/revalidate` (Sanity webhook)                 |
+| `STATUS_CRON_SECRET`             | server | Reserved for protecting refresh triggers                  |
+| `ALLOWED_FEED_HOSTNAMES`         | server | Optional comma-separated SSRF allowlist additions         |
+
+> `NEXT_PUBLIC_*` values are inlined at **build time** — changing them on Netlify requires a rebuild.
+
+## Scripts
+
+| Command                     | Description                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------- |
+| `pnpm dev`                  | Dev server                                                                               |
+| `pnpm build` / `pnpm start` | Production build / serve                                                                 |
+| `pnpm typecheck`            | `tsc --noEmit`                                                                           |
+| `pnpm lint`                 | ESLint (flat config)                                                                     |
+| `pnpm test`                 | Vitest unit tests (classification, normalization, fetchers, snapshot)                    |
+| `pnpm test:e2e`             | Playwright smoke tests (needs a build; run `pnpm exec playwright install chromium` once) |
+| `pnpm seed`                 | Seed Sanity with categories + services from `src/lib/status/config.ts`                   |
+| `pnpm format`               | Prettier                                                                                 |
+
+## Sanity
+
+- **Studio** is embedded at `/studio` (noindex, behind Sanity auth). No separate `sanity deploy` needed.
+- **Schemas:** `statusPageSettings`, `statusCategory`, `statusService`, `manualIncident`
+  (`src/sanity/schemaTypes`).
+- **Editors** can add/remove/hide/pin/categorize services, set manual overrides, post manual
+  incidents/maintenance, and edit settings + the announcement banner — no code changes.
+- **Seeding:** `pnpm seed` (idempotent; uploads logos from `/public/images`). Requires a write token.
+- **CORS:** the embedded Studio needs each host added under Sanity → Manage → API → CORS Origins
+  (`localhost:3000`, the Netlify URL, and `status.lastrev.com` are configured).
+- **Instant updates:** a Sanity webhook posts to `/api/revalidate?secret=…`, which refreshes the
+  snapshot so edits appear in seconds (otherwise the 3-min schedule picks them up).
+
+## Netlify
+
+- Build: `pnpm build` with `@netlify/plugin-nextjs`; `NODE_VERSION = 24` (`netlify.toml`).
+- `netlify/functions/update-status.ts` runs on a 3-minute schedule and writes the snapshot to Blobs.
+- Security headers + CSP and `/studio` + `/api` noindex are set in `next.config.ts` `headers()`
+  (so they apply to SSR responses, which `netlify.toml` headers do not).
+- Set the env vars above in Site settings → Environment variables, then trigger a rebuild.
+
+## Project structure
 
 ```
-npm start
+app/                     # App Router routes (page, api/status, api/revalidate, robots, sitemap, studio)
+src/lib/status/          # types, config/seed, fetchers, classify, normalize, sanitize, snapshot, cache
+src/lib/sanity/          # client + GROQ queries
+src/sanity/schemaTypes/  # Sanity schemas
+src/components/status/   # dashboard UI
+src/theme/               # MUI theme + tokens
+netlify/functions/       # scheduled aggregator
+scripts/seed-sanity.ts   # seeding
 ```
 
-Go to [http://localhost:3000](http://localhost:3000)
- 
-### Key Files
-`./build_scripts/www` Startup Script
+## Troubleshooting
 
-`./src/app.js` This is the main application file that loads all the middleware
+- **Page shows seed data / `/images` logos instead of Sanity:** the deploy was built before env vars
+  were set, or the dataset is unreachable. Set env vars and trigger a rebuild.
+- **Studio won't log in:** add the origin under Sanity → Manage → API → CORS Origins (with credentials).
+- **A service is missing/extra incidents:** tune that service's `ignoreTitlePatterns` /
+  `maintenanceKeywords` / `noIncidentPatterns` in Studio. Disabled services are excluded entirely;
+  hidden services are fetched but not shown.
+- **Stale data on prod:** the page serves the cached Blob (refreshed every 3 min). Trigger
+  `/api/revalidate` (or edit in Studio) to refresh immediately.
 
-`./src/client/root` All static files that need to be copied to the public folder
+## Cutover (Heroku → Netlify)
 
-`./src/client/scripts/main.js` Clientside Javascript entry point
-
-`./src/client/styles/main.scss` The main scss entrypoint
-
-`./src/handlebars/helpers` Place all your custom handlebars helpers here
-
-`./src/handlebars/helpers/index` The main entry point for the handlebars helpers. When you create and new one add it here as well to register it
-
-`./src/handlebars/layouts/www_layout.hbs` The main HTML wrapper for the site
-
-`./src/handlebars/pages` Individual main page templates should go here
-
-`./src/handlebars/partials/` all partials will go here. We will create sub directories for different types of components
-
-`./src/server/config` Sets all of the site configuraton like logger setup and enviroment variables for different services
-
-`./src/server/controllers` This is where a majority of the buisness logic will go and different controllers for communicating with vendors and displaying content on pages
-
-`./src/server/middleware` All of the custom middleware for express routes
-
-`./src/server/routes/api` All internal API routes that will be used for client side requests from the server. Will return data as JSON
-
-`./src/server/routes/web` All the web page routes
-
-## Dependencies
-<!-- AUTO-GENERATED-CONTENT:START (depTable:dev=true&production=true) -->
-| **Dependency** | **Description** | **Version** | **License** | **Type** |
-| -------------- | --------------- | ----------- | ----------- | -------- |
- | [@sentry/node@^5.5.0](https://github.com/getsentry/sentry-javascript/tree/master/packages/node) | Offical Sentry SDK for Node.js | 5.5.0 | BSD-3-Clause | production | 
- | [body-parser@^1.19.0](https://github.com/expressjs/body-parser#readme) | Node.js body parsing middleware | 1.19.0 | MIT | production | 
- | [bootstrap@^4.3.1](https://getbootstrap.com/) | The most popular front-end framework for developing responsive, mobile first projects on the web. | 4.3.1 | MIT | production | 
- | [cookie-parser@^1.4.4](https://github.com/expressjs/cookie-parser#readme) | Parse HTTP request cookies | 1.4.4 | MIT | production | 
- | [express@^4.17.1](http://expressjs.com/) | Fast, unopinionated, minimalist web framework | 4.17.1 | MIT | production | 
- | [express-handlebars@^3.1.0](https://github.com/ericf/express-handlebars) | A Handlebars view engine for Express which doesn't suck. | 3.1.0 | BSD-3-Clause | production | 
- | [handlebars@^4.1.2](http://www.handlebarsjs.com/) | Handlebars provides the power necessary to let you build semantic templates effectively with no frustration | 4.1.2 | MIT | production | 
- | [handlebars-helpers@^0.10.0](https://github.com/helpers/handlebars-helpers) | More than 130 Handlebars helpers in ~20 categories. Helpers can be used with Assemble, Generate, Verb, Ghost, gulp-handlebars, grunt-handlebars, consolidate, or any node.js/Handlebars project. | 0.10.0 | MIT | production | 
- | [helmet@^3.19.0](https://helmetjs.github.io/) | help secure Express/Connect apps with various HTTP headers | 3.19.0 | MIT | production | 
- | [jquery@^3.4.1](https://jquery.com) | JavaScript library for DOM operations | 3.4.1 | MIT | production | 
- | [lodash@^4.17.1...](https://lodash.com/) | Lodash modular utilities. | 4.17.15 | MIT | production | 
- | [morgan@^1.9.1](https://github.com/expressjs/morgan#readme) | HTTP request logger middleware for node.js | 1.9.1 | MIT | production | 
- | [popper.js@^1.15.0](https://popper.js.org) | A kickass library to manage your poppers | 1.15.0 | MIT | production | 
- | [winston@^3.2.1](https://github.com/winstonjs/winston#readme) | A logger for just about everything. | 3.2.1 | MIT | production | 
- | [@babel/preset-env@^7.5.5](https://babeljs.io/) | A Babel preset for each environment. | 7.5.5 | MIT | dev | 
- | [@sentry/webpack-plugin@^1.7.0](https://github.com/getsentry/sentry-webpack-plugin) | Official webpack plugin for Sentry | 1.7.0 | MIT | dev | 
- | [babel-jest@^24.8.0](https://github.com/facebook/jest#readme) | Jest plugin to use babel for transformation. | 24.8.0 | MIT | dev | 
- | [concurrently@^4.1.1](https://github.com/kimmobrunfeldt/concurrently#readme) | Run commands concurrently | 4.1.1 | MIT | dev | 
- | [copy-webpack-plugin@^5.0.3](https://github.com/webpack-contrib/copy-webpack-plugin) | Copy files && directories with webpack | 5.0.3 | MIT | dev | 
- | [css-loader@^3.1.0](https://github.com/webpack-contrib/css-loader) | css loader module for webpack | 3.1.0 | MIT | dev | 
- | [dotenv@^8.0.0](https://github.com/motdotla/dotenv#readme) | Loads environment variables from .env file | 8.0.0 | BSD-2-Clause | dev | 
- | [eslint@^6.0.1](https://eslint.org) | An AST-based pattern checker for JavaScript. | 6.0.1 | MIT | dev | 
- | [eslint-config-airbnb-base@^13.2.0](https://github.com/airbnb/javascript) | Airbnb's base JS ESLint config, following our styleguide | 13.2.0 | MIT | dev | 
- | [eslint-loader@^2.2.1](https://github.com/webpack-contrib/eslint-loader#readme) | eslint loader (for webpack) | 2.2.1 | MIT | dev | 
- | [eslint-plugin-import@^2.18.2](https://github.com/benmosher/eslint-plugin-import) | Import with sanity. | 2.18.2 | MIT | dev | 
- | [jest@^24.8.0](https://jestjs.io/) | Delightful JavaScript Testing. | 24.8.0 | MIT | dev | 
- | [markdown-magic@^0.1.25](https://github.com/DavidWells/markdown-magic#readme) | Automatically update markdown files with content from external sources | 0.1.25 | MIT | dev | 
- | [markdown-magic-dependency-table@^1.3.2](https://github.com/camacho/markdown-magic-dependency-table#readme) | Generate table of information about dependencies automatically in markdown | 1.3.2 | MIT | dev | 
- | [markdown-magic-jsdoc@^1.0.1](https://github.com/bradtaylorsf/markdown-magic-jsdoc#readme) | A plugin for markdown-magic that parses jsdoc style comments as a transform | 1.0.1 | MIT | dev | 
- | [mini-css-extract-plugin@^0.8.0](https://github.com/webpack-contrib/mini-css-extract-plugin) | extracts CSS into separate files | 0.8.0 | MIT | dev | 
- | [node-sass@^4.12.0](https://github.com/sass/node-sass) | Wrapper around libsass | 4.12.0 | MIT | dev | 
- | [nodemon@^1.19.1](http://nodemon.io) | Simple monitor script for use during development of a node.js app. | 1.19.1 | MIT | dev | 
- | [optimize-css-assets-webpack-plugin@^5.0.3](http://github.com/NMFR/optimize-css-assets-webpack-plugin) | A Webpack plugin to optimize \ minimize CSS assets. | 5.0.3 | MIT | dev | 
- | [sass-loader@^7.1.0](https://github.com/webpack-contrib/sass-loader) | Sass loader for webpack | 7.1.0 | MIT | dev | 
- | [uglifyjs-webpack-plugin@^2.1.3](https://github.com/webpack-contrib/uglifyjs-webpack-plugin) | UglifyJS plugin for webpack | 2.1.3 | MIT | dev | 
- | [webpack@^4.36.1](https://github.com/webpack/webpack) | Packs CommonJs/AMD modules for the browser. Allows to split your codebase into multiple bundles, which can be loaded on demand. Support loaders to preprocess files, i.e. json, jsx, es7, css, less, ... and your custom stuff. | 4.36.1 | MIT | dev | 
- | [webpack-cli@^3.3.6](https://github.com/webpack/webpack-cli#readme) | CLI for webpack & friends | 3.3.6 | MIT | dev | 
- | [webpack-dev-middleware@^3.7.0](https://github.com/webpack/webpack-dev-middleware) | A development middleware for webpack | 3.7.0 | MIT | dev | 
- | [webpack-hot-middleware@^2.25.0](https://github.com/webpack-contrib/webpack-hot-middleware#readme) | Webpack hot reloading you can attach to your own server | 2.25.0 | MIT | dev | 
- | [webpack-merge@^4.2.1](https://github.com/survivejs/webpack-merge) | Variant of merge that's useful for webpack configuration | 4.2.1 | MIT | dev | 
-<!-- AUTO-GENERATED-CONTENT:END -->
-
-
-
-
-
-
-
-
-## Notes
-<pre><code>
-// Normalizing Heroku Status Page Feed
-
-// this function is used to normalize the heroku feed. In pagedata.services below the feed is the first variable and the two string as are passed in. As a refactor I'd like to do this a little differently to add in as an array or class or something in order to minimize the duplication or make it easier to add a new feed maybe...
-const normalizeHerokuFeed = (feed, serviceDisplayName, serviceIdName) => { 
-  //this is the function used to create the new object that will be used in handlebars/the json viewer and what will normalize the data.
-  const herokuNormalized = {
-    //the three objects below are created to be used instead of the initial raw data, add more here to add it to the json view, don't forget to bring the information in through the normalizeHerokuFeed function above as well.
-    serviceName: serviceDisplayName,
-    serviceId: serviceIdName,
-    //creating the array for the data from the raw feed
-    issues: [],
-  };
-  
-  // this function uses feed (the heroku raw feed) and loops through the feed objects and gives them new names (keys?) inside of the issues array above. 
-  _.each(feed, herokuIssue => {
-    // creating a new object to hold the data that will be pushed in to the issues array.
-    const normIssue = {
-    // the left is the new object (key?) and the value is the right where we will call the propertys of the object. Feed is renamed 'herokuIssue' using lodash's 2nd parameter inside of the _.each(var1, var2)
-    //Because 'feed' is an array of objects, we will call each item from the feed using dot notation (ex: 'var2.key' key=the original name of the object inside of the feed. )
-      id: herokuIssue.id,
-      pubDate: herokuIssue.create_at,
-      title: herokuIssue.title,
-      state: herokuIssue.state,
-      fullUrl: herokuIssue.full_url,
-      // here we create a new array that we will use a nested function from inside of the normIssue function that will allow us to grab the information inside of the updates array that we will need to loop through in a new '_.each' function that will be pushed to the normIssues object updates array before we send the information to the issues array inside of the normalizeHeroku object.
-      updates: []
-    };
-
-    // so because we are inside of the normIssue object using herokuIssue as the name of the feed we will call it using the herokuIssue in place of feed from the above _.each but we need to select the updates[] whcih is what we will be looping through. We then rename it to just 'updates'. (ex. herokueIssue.updates === updates -aka- var1 === var2)
-    _.each(herokuIssue.updates, updates => {
-    // creating a new const var inside of the function that we will call the information just like we did above.
-      const updateIssue = {
-        id: updates.id,
-        title: updates.content,
-        state: updates.update_type
-
-      }
-      // because we are nested inside of another '_.each' (for loop but using lodash) we need to push to the updates array inside of the normIssue variable.
-      normIssue.updates.push(updateIssue);
-    });
-
-    // we are pushing the data from the normIssue variable above in to the issues array inside of the herokuNormalized object
-    herokuNormalized.issues.push(normIssue);
-  }); 
-    //this is where we will return the information back to feed and give the original feed variable the new information
-  return herokuNormalized;
-};
-
-
-    // Parse that data and put into an object
-    res.locals.pageData = {
-      // originalData: {
-      //   herokuIssues,
-      //   bigCommerce,
-      //   netlify,
-      //   circleCi,
-      //   cloudways,
-      //   sentry,
-      //   jiraServiceDesk,
-      //   zoom,
-      //   contentfulFeed
-      // },
-      services: {
-        herokuIssues: normalizeHerokuFeed(herokuIssues, 'Heroku', 'heroku'),
-        bigCommerce: normalizeRssFeed(bigCommerce, 'BigCommerce', 'bigcommerce'),
-        netlify: normalizeRssFeed(netlify, 'Netlify', 'netlify'),
-        circleCi: normalizeRssFeed(circleCi, 'Circle Ci', 'circleci'),
-        cloudways: normalizeRssFeed(cloudways, 'Cloudways', 'cloudways'),
-        sentry: normalizeRssFeed(sentry, 'Sentry', 'sentry'),
-        jiraServiceDesk: normalizeRssFeed(jiraServiceDesk, 'Jira Service Desk', 'jiraservicedesk'),
-        zoom: normalizeRssFeed(zoom, 'Zoom', 'zoom'),
-        contentfulFeed: normalizeRssFeed(contentfulFeed, 'Contentful', 'contentful')
-      }
-    }
-
-</code></pre>
-
-<code><pre>
-// helped with finding typeof etc to track down moment() bug
-    console.log('RETRUNED VALUE TYPE: ', typeof herokuIssue.created_at);
-    console.log('MOMENT TYPEOF: ', typeof moment(herokuIssue.created_at, "MMMM"))
-    console.log('Value of Object: ', moment(herokuIssue.created_at, "MMMM"))
-</code></pre>
+1. Verify the Netlify deploy + scheduled refresh + Studio edits.
+2. Point `status.lastrev.com` DNS at Netlify; keep the Heroku app running until verified.
+3. Decommission Heroku once traffic is confirmed on Netlify.

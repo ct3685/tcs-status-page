@@ -1,0 +1,19 @@
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "24"
+  # Enable corepack so the pinned pnpm (packageManager field) is used.
+  COREPACK_ENABLE_STRICT = "0"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# The status aggregator runs on a schedule declared inline in
+# netlify/functions/update-status.ts (every 3 minutes).
+#
+# Security headers (CSP, HSTS, X-Frame-Options, etc.) and noindex tags for
+# /studio and /api are set authoritatively via Next's headers() in
+# next.config.ts so they apply to SSR/function responses too.
