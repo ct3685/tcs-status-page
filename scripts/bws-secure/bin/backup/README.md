@@ -5,7 +5,6 @@ This folder contains vendored bws CLI binaries used as a fallback when GitHub is
 ## How It Works
 
 The `bws-installer.sh` script:
-
 1. **First** tries to download from GitHub
 2. **Falls back** to these local binaries if download fails
 3. **Validates checksums** regardless of source
@@ -28,7 +27,6 @@ bin/backup/
 ```
 
 The script automatically:
-
 - Fetches the checksum file first
 - Discovers all available binaries from the checksum file
 - Downloads each binary
@@ -53,7 +51,6 @@ rm -rf v1.0.0
 ## Supported Platforms
 
 The binaries cover:
-
 - **Linux**: x64, ARM64 (glibc)
 - **macOS**: x64, ARM64, Universal
 - **Windows**: x64, ARM64
@@ -63,3 +60,4 @@ The binaries cover:
 - **Resilience**: Upstream changes (repo renames, CDN issues) won't break builds
 - **Speed**: Local copies are instant when available
 - **Verification**: All binaries are SHA256 checksum verified
+

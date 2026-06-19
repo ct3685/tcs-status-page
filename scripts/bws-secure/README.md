@@ -387,7 +387,6 @@ bin/backup/
 ```
 
 **Priority order:**
-
 1. Download from GitHub (primary)
 2. Use local backup if download fails (fallback)
 
@@ -396,15 +395,12 @@ bin/backup/
 To update to a new bws version:
 
 1. **Download new version binaries:**
-
    ```bash
    ./bin/backup/download-backups.sh 1.1.0
    ```
-
    The script automatically discovers and downloads all available binaries for the specified version.
 
 2. **Update default version in `bws-installer.sh`:**
-
    ```bash
    DEFAULT_BWS_VERSION="1.1.0"
    ```

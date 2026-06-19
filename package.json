@@ -9,9 +9,9 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "pnpm secure-run next dev",
+    "build": "pnpm secure-run next build",
+    "start": "pnpm secure-run next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

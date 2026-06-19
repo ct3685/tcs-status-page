@@ -77,7 +77,6 @@ When multiple project IDs are specified, secrets are loaded in order with a "las
 ### Example Scenario
 
 **Project 1 Secrets:**
-
 ```
 API_KEY=shared-key
 DATABASE_URL=postgres://shared-db
@@ -85,14 +84,12 @@ SERVICE_NAME=shared-service
 ```
 
 **Project 2 Secrets:**
-
 ```
 DATABASE_URL=postgres://specific-db
 CUSTOM_VAR=specific-value
 ```
 
 **Final Merged Result:**
-
 ```
 API_KEY=shared-key              # From Project 1
 DATABASE_URL=postgres://specific-db  # From Project 2 (overrides Project 1)
@@ -163,7 +160,6 @@ DEBUG=true BWS_PROJECT_ID="id1, id2, id3" pnpm dev
 ```
 
 Debug output will show:
-
 - Number of secrets loaded from each project
 - Total merged variables
 - Which project IDs are being processed
@@ -251,19 +247,16 @@ There is **no required migration**. Existing single-UUID configs and `BWS_PROJEC
 ## Troubleshooting
 
 ### No secrets loaded
-
 - Verify all project IDs are valid UUIDs
 - Check that BWS_ACCESS_TOKEN has access to all project IDs
 - Enable DEBUG=true to see detailed loading information
 
 ### Unexpected variable values
-
 - Review the order of project IDs (last wins for duplicates)
 - Use DEBUG=true and SHOW_DECRYPTED=true to inspect merged results
 - Verify each project contains expected secrets in BWS
 
 ### Performance concerns
-
 - Each project ID requires an API call to BWS
 - Results are cached to avoid redundant loading
 - Consider consolidating if loading too many projects becomes slow
@@ -286,3 +279,4 @@ There is **no required migration**. Existing single-UUID configs and `BWS_PROJEC
 ## Support
 
 For issues, questions, or feature requests related to multi-project ID support, please refer to the main repository README or open an issue.
+
