@@ -16,6 +16,19 @@ const DEFAULT_MAINTENANCE_KEYWORDS = [
   'this is a scheduled event',
 ];
 
+// High-precision maintenance signals checked against the body. Some feeds
+// (notably Cloudflare's history.rss) title scheduled events by datacenter +
+// date — e.g. "LAX (Los Angeles) on 2026-06-22" — and put the maintenance
+// wording only in the description. These phrases are specific enough that
+// matching them in content does not introduce the noise the bare word
+// "maintenance" would.
+const DEFAULT_MAINTENANCE_CONTENT_SIGNALS = [
+  'this is a scheduled event',
+  'scheduled maintenance',
+  'the scheduled maintenance has been completed',
+  'scheduled maintenance is currently in progress',
+];
+
 const DEFAULT_NO_INCIDENT_PATTERNS = [
   'no incidents reported',
   'all systems operational',
@@ -98,11 +111,14 @@ export function detectIncidentType(
   const c = normalize(content);
   const customMaintenance = (opts.maintenanceKeywords ?? []).map(normalize);
 
-  // Maintenance is detected from the title (reliable) plus opt-in custom
-  // keywords (which may also match content). Content alone is too noisy.
+  // Maintenance is detected from the title (reliable), a curated set of
+  // high-precision body signals (for feeds that only name maintenance in the
+  // description), plus opt-in custom keywords. The bare word "maintenance" in
+  // content alone is intentionally still avoided as too noisy.
   if (
     t.includes('maintenance') ||
     DEFAULT_MAINTENANCE_KEYWORDS.some((k) => t.includes(k)) ||
+    DEFAULT_MAINTENANCE_CONTENT_SIGNALS.some((k) => c.includes(k)) ||
     customMaintenance.some((k) => t.includes(k) || c.includes(k))
   ) {
     return 'maintenance';
@@ -110,7 +126,10 @@ export function detectIncidentType(
 
   if (
     isNoIncidentTitle(title) ||
-    matchesAnyPattern(title, [...DEFAULT_INFORMATIONAL_PATTERNS, ...(opts.informationalPatterns ?? [])])
+    matchesAnyPattern(title, [
+      ...DEFAULT_INFORMATIONAL_PATTERNS,
+      ...(opts.informationalPatterns ?? []),
+    ])
   ) {
     return 'informational';
   }
@@ -118,14 +137,18 @@ export function detectIncidentType(
 }
 
 /** Best-effort lifecycle status from feed text (Atlassian feeds rarely expose it). */
-export function deriveIncidentStatus(title: string, content: string, type: IncidentType): IncidentStatus {
+export function deriveIncidentStatus(
+  title: string,
+  content: string,
+  type: IncidentType,
+): IncidentStatus {
   const text = `${normalize(title)} ${normalize(content)}`;
   if (type === 'maintenance') {
     if (text.includes('completed')) return 'completed';
     if (text.includes('in progress') || text.includes('in-progress')) return 'inProgress';
     return 'scheduled';
   }
-  if (text.includes('resolved')) return 'resolved';
+  if (text.includes('resolved') || text.includes('completed')) return 'resolved';
   if (text.includes('monitoring')) return 'monitoring';
   if (text.includes('identified')) return 'identified';
   if (text.includes('investigating')) return 'investigating';
@@ -172,6 +195,39 @@ export function computeRecency(
     isVeryRecent: ageMs <= t.veryRecentHours * 3_600_000,
     isRecent: ageMs <= t.recentHours * 3_600_000,
   };
+}
+
+/**
+ * Parse an explicit maintenance window from feed body text.
+ *
+ * Atlassian Statuspage "Scheduled" updates embed a fully-qualified UTC window,
+ * e.g. "...on 2026-06-25 between 00:00 and 05:00 UTC." This is far more reliable
+ * than the feed's publish date for timing, since feeds are inconsistent (some
+ * set pubDate to the event start, others to the latest update). Returns null
+ * when no recognizable UTC window is present so callers fall back to
+ * publish-date heuristics.
+ */
+export function parseMaintenanceWindow(
+  content: string | null | undefined,
+): { startsAt: string; endsAt: string } | null {
+  const text = (content ?? '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  const match = text.match(
+    /\bon\s+(\d{4}-\d{2}-\d{2})\s+between\s+(\d{1,2}:\d{2})\s+and\s+(\d{1,2}:\d{2})\s*UTC\b/i,
+  );
+  if (!match) return null;
+  const date = match[1];
+  const startTime = match[2];
+  const endTime = match[3];
+  if (!date || !startTime || !endTime) return null;
+
+  const start = new Date(`${date}T${startTime.padStart(5, '0')}:00Z`);
+  let end = new Date(`${date}T${endTime.padStart(5, '0')}:00Z`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+  // Windows that cross midnight (end <= start) roll into the next day.
+  if (end.getTime() <= start.getTime()) {
+    end = new Date(end.getTime() + 24 * 3_600_000);
+  }
+  return { startsAt: start.toISOString(), endsAt: end.toISOString() };
 }
 
 export function maintenanceTiming(

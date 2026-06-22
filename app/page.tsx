@@ -14,14 +14,14 @@ import { publicEnv } from '@/lib/env';
 // Reads the cached Blob snapshot at request time; never prerendered at build.
 export const dynamic = 'force-dynamic';
 
-const FALLBACK_OG = '/images/status_page_logo_optimized_1200x630.png';
-
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await loadSettings();
   const title = settings.seoTitle ?? settings.title;
   const description = settings.seoDescription ?? undefined;
   const url = publicEnv.NEXT_PUBLIC_SITE_URL;
-  const image = settings.ogImage ?? FALLBACK_OG;
+  // When Sanity provides an OG image, use it; otherwise fall back to the
+  // branded app/opengraph-image.tsx file convention (omit images here).
+  const imageOverride = settings.ogImage ? { images: [settings.ogImage] } : {};
 
   return {
     title,
@@ -34,9 +34,9 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: 'Last Rev Status',
       title,
       description,
-      images: [image],
+      ...imageOverride,
     },
-    twitter: { card: 'summary_large_image', title, description, images: [image] },
+    twitter: { card: 'summary_large_image', title, description, ...imageOverride },
   };
 }
 

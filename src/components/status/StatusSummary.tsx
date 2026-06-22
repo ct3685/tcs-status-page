@@ -51,7 +51,20 @@ function Tile({
         alignItems: 'center',
         textAlign: 'center',
         gap: 0.5,
-        transition: 'all 0.15s ease',
+        transition:
+          'transform .18s ease, border-color .18s ease, box-shadow .18s ease, background-color .18s ease',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          borderColor: selected ? color : 'rgba(200,169,106,0.55)',
+          boxShadow: selected
+            ? `0 0 0 1px ${color}40, 0 12px 30px -14px ${color}66`
+            : '0 0 0 1px rgba(200,169,106,0.3), 0 12px 30px -14px rgba(200,169,106,0.4)',
+          bgcolor: selected ? `${color}29` : 'rgba(200,169,106,0.06)',
+        },
+        '&:focus-visible': {
+          borderColor: 'rgba(200,169,106,0.7)',
+          boxShadow: '0 0 0 2px rgba(200,169,106,0.4)',
+        },
       }}
     >
       <Typography variant="h4" sx={{ fontWeight: 800, color }}>

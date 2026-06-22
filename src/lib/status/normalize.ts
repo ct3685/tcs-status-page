@@ -7,6 +7,7 @@ import {
   maintenanceTiming,
   matchesAnyPattern,
   parseDate,
+  parseMaintenanceWindow,
   severityFromText,
   severityToLevel,
   stableIncidentId,
@@ -53,18 +54,22 @@ export function normalizeIncident(
   const { isRecent, isVeryRecent } = computeRecency(publishedAt, now, t);
 
   const isResolved = status === 'resolved' || status === 'completed';
-  const startedAt = publishedAt;
-  const resolvedAt = isResolved ? (updatedAt ?? publishedAt) : null;
+
+  // Prefer an explicit window parsed from the body (e.g. Atlassian's
+  // "on YYYY-MM-DD between HH:MM and HH:MM UTC") over the feed's publish date,
+  // which is unreliable for timing future/current/past maintenance.
+  const window = type === 'maintenance' ? parseMaintenanceWindow(raw.contentHtml) : null;
+  const startedAt = window?.startsAt ?? publishedAt;
+  const resolvedAt = isResolved ? (window?.endsAt ?? updatedAt ?? publishedAt) : null;
 
   const timing =
     type === 'maintenance'
-      ? maintenanceTiming(startedAt, resolvedAt, now)
+      ? maintenanceTiming(startedAt, window?.endsAt ?? resolvedAt, now)
       : { isFutureMaintenance: false, isCurrentMaintenance: false };
 
-  // Feed maintenance with no explicit end date should not appear "current"
-  // indefinitely; without an end time only treat very recent items as current
-  // (feeds rarely expose maintenance end times, so this avoids over-reporting).
-  if (type === 'maintenance' && !resolvedAt && !isVeryRecent) {
+  // Without a definitive end time, don't let an open-ended maintenance appear
+  // "current" indefinitely; only treat very recent items as current.
+  if (type === 'maintenance' && !window && !resolvedAt && !isVeryRecent) {
     timing.isCurrentMaintenance = false;
   }
 
@@ -111,11 +116,14 @@ function deriveServiceLevel(
   recent: Incident[],
   maintenance: Incident[],
 ): ServiceStatusLevel {
+  // Red (partial/major outage) is reserved for incidents that are ACTIVE and
+  // unresolved right now — surfaced at their real severity. A resolved incident
+  // (or maintenance) must never make a healthy service look critical.
   if (active.length > 0) {
     return severityToLevel(worstSeverity(active.map((i) => i.severity)));
   }
-  if (recent.some((i) => i.isVeryRecent)) return 'partialOutage';
   if (maintenance.some((i) => i.isCurrentMaintenance)) return 'maintenance';
+  // Recently-resolved incidents leave a soft caution signal (yellow), not red.
   if (recent.some((i) => i.isRecent)) return 'degraded';
   return 'operational';
 }

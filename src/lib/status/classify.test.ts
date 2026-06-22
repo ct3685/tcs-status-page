@@ -7,6 +7,7 @@ import {
   isNoIncidentTitle,
   maintenanceTiming,
   parseDate,
+  parseMaintenanceWindow,
   severityFromText,
   stableIncidentId,
   toneFromLevel,
@@ -39,9 +40,26 @@ describe('detectIncidentType', () => {
     expect(detectIncidentType('Elevated error rates', 'We are investigating')).toBe('incident');
   });
   it('honors custom maintenance keywords', () => {
-    expect(detectIncidentType('Patch rollout', 'planned upgrade', { maintenanceKeywords: ['planned upgrade'] })).toBe(
-      'maintenance',
-    );
+    expect(
+      detectIncidentType('Patch rollout', 'planned upgrade', {
+        maintenanceKeywords: ['planned upgrade'],
+      }),
+    ).toBe('maintenance');
+  });
+  it('detects maintenance from body signals when the title is location/date only', () => {
+    // Cloudflare history.rss shape: datacenter title, maintenance wording in body.
+    expect(
+      detectIncidentType(
+        'LAX (Los Angeles) on 2026-06-22',
+        'Completed - The scheduled maintenance has been completed.',
+      ),
+    ).toBe('maintenance');
+    expect(
+      detectIncidentType(
+        'ARN (Stockholm) on 2026-06-25',
+        'THIS IS A SCHEDULED EVENT Jun 25, 00:00 - 05:00 UTC',
+      ),
+    ).toBe('maintenance');
   });
 });
 
@@ -65,12 +83,20 @@ describe('computeRecency', () => {
     expect(r.isRecent).toBe(true);
   });
   it('flags recent but not very recent within 24h', () => {
-    const r = computeRecency(new Date(NOW.getTime() - 10 * 3600_000).toISOString(), NOW, thresholds);
+    const r = computeRecency(
+      new Date(NOW.getTime() - 10 * 3600_000).toISOString(),
+      NOW,
+      thresholds,
+    );
     expect(r.isVeryRecent).toBe(false);
     expect(r.isRecent).toBe(true);
   });
   it('old incidents are neither', () => {
-    const r = computeRecency(new Date(NOW.getTime() - 72 * 3600_000).toISOString(), NOW, thresholds);
+    const r = computeRecency(
+      new Date(NOW.getTime() - 72 * 3600_000).toISOString(),
+      NOW,
+      thresholds,
+    );
     expect(r.isRecent).toBe(false);
   });
   it('future dates are neither', () => {
@@ -92,6 +118,25 @@ describe('maintenanceTiming', () => {
     const end = new Date(NOW.getTime() + 3600_000).toISOString();
     const t = maintenanceTiming(start, end, NOW);
     expect(t.isCurrentMaintenance).toBe(true);
+  });
+});
+
+describe('parseMaintenanceWindow', () => {
+  it('parses an Atlassian UTC window from the body', () => {
+    expect(
+      parseMaintenanceWindow(
+        'Scheduled - We will be performing scheduled maintenance ... on 2026-06-25 between 00:00 and 05:00 UTC.',
+      ),
+    ).toEqual({ startsAt: '2026-06-25T00:00:00.000Z', endsAt: '2026-06-25T05:00:00.000Z' });
+  });
+  it('rolls a midnight-crossing window into the next day', () => {
+    const w = parseMaintenanceWindow('on 2026-06-25 between 23:00 and 02:00 UTC');
+    expect(w?.startsAt).toBe('2026-06-25T23:00:00.000Z');
+    expect(w?.endsAt).toBe('2026-06-26T02:00:00.000Z');
+  });
+  it('returns null when no UTC window is present', () => {
+    expect(parseMaintenanceWindow('Investigating elevated error rates')).toBeNull();
+    expect(parseMaintenanceWindow('')).toBeNull();
   });
 });
 
@@ -124,9 +169,17 @@ describe('helpers', () => {
     expect(deriveIncidentStatus('x', 'Resolved - all good', 'incident')).toBe('resolved');
     expect(deriveIncidentStatus('x', 'We are investigating', 'incident')).toBe('investigating');
   });
+  it('deriveIncidentStatus treats "completed" as resolved for incidents and maintenance', () => {
+    expect(deriveIncidentStatus('x', 'Completed - all done', 'incident')).toBe('resolved');
+    expect(deriveIncidentStatus('x', 'Completed - done', 'maintenance')).toBe('completed');
+  });
   it('isManualOverrideActive respects expiry', () => {
-    expect(isManualOverrideActive(new Date(NOW.getTime() + 3600_000).toISOString(), NOW)).toBe(true);
-    expect(isManualOverrideActive(new Date(NOW.getTime() - 3600_000).toISOString(), NOW)).toBe(false);
+    expect(isManualOverrideActive(new Date(NOW.getTime() + 3600_000).toISOString(), NOW)).toBe(
+      true,
+    );
+    expect(isManualOverrideActive(new Date(NOW.getTime() - 3600_000).toISOString(), NOW)).toBe(
+      false,
+    );
     expect(isManualOverrideActive(null, NOW)).toBe(false);
   });
 });

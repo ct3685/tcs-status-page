@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0A0A0A"/>
+  <svg x="56" y="149" width="400" height="215" viewBox="0 0 342 184">
+    <defs>
+      <linearGradient id="bf-icon" x1="0.12" y1="0" x2="0.04" y2="1">
+        <stop offset="0%" stop-color="#F0E2C0"/>
+        <stop offset="38%" stop-color="#D9BD7E"/>
+        <stop offset="72%" stop-color="#C6A564"/>
+        <stop offset="100%" stop-color="#9C7A3C"/>
+      </linearGradient>
+    </defs>
+    <g fill="none" stroke="url(#bf-icon)" stroke-width="30" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="6">
+      <polyline points="84,52 44,92 84,132"/>
+      <polyline points="108,136 148,48"/>
+      <polyline points="258,52 298,92 258,132"/>
+    </g>
+    <path d="M162,72 L214,58 L234,78 L208,96 L192,96 L192,132 L162,132 Z" fill="url(#bf-icon)"/>
+  </svg>
+</svg>

@@ -39,11 +39,15 @@ export default function StatusHero({
         p: { xs: 3, md: 5 },
         border: '1px solid',
         borderColor: 'divider',
-        background: `radial-gradient(120% 140% at 0% 0%, ${v.glow} 0%, transparent 55%), var(--mui-palette-background-paper)`,
+        background: `radial-gradient(120% 140% at 0% 0%, ${v.glow} 0%, transparent 50%), radial-gradient(90% 120% at 100% 100%, rgba(200,169,106,0.05), transparent 55%), linear-gradient(160deg, #161616 0%, #0E0E0E 60%, #0A0A0A 100%)`,
       }}
     >
-      <Stack spacing={2}>
-        <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
+      <Stack spacing={2.25}>
+        <Stack spacing={1}>
+          <Typography variant="overline">System Status</Typography>
+          <Box aria-hidden sx={{ width: 44, height: 2, bgcolor: 'primary.main', opacity: 0.75, borderRadius: 1 }} />
+        </Stack>
+        <Stack direction="row" spacing={2.5} sx={{ alignItems: 'center' }}>
           <Box
             sx={{
               display: 'grid',
@@ -62,7 +66,7 @@ export default function StatusHero({
             />
           </Box>
           <Box>
-            <Typography variant="h1" sx={{ fontSize: { xs: '1.6rem', md: '2.4rem' } }}>
+            <Typography variant="h1" sx={{ fontSize: { xs: '1.7rem', md: '2.5rem' } }}>
               {headline}
             </Typography>
             <Typography variant="body1" color="text.secondary">

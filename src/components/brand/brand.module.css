@@ -1,0 +1,560 @@
+/* =========================================================================
+   Bracket Forge — Last Rev brand identity board
+   Dark, elite, executive-grade presentation styling.
+   ========================================================================= */
+
+.stage {
+  --obsidian: #0a0a0a;
+  --charcoal: #1b1b1b;
+  --ivory: #f6f6f4;
+  --gold: #c8a96a;
+  --gold-soft: #d8be84;
+  --graphite: #9a9a9a;
+  --shadow: #050505;
+  --hairline: rgba(246, 246, 244, 0.08);
+  --hairline-strong: rgba(246, 246, 244, 0.14);
+  --panel: rgba(255, 255, 255, 0.022);
+  --font-sans: var(--font-inter), 'Söhne', 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 3vw, 48px);
+  color: var(--ivory);
+  /* Layered textured obsidian surface. */
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(200, 169, 106, 0.07), transparent 46%),
+    radial-gradient(120% 120% at 100% 100%, rgba(200, 169, 106, 0.04), transparent 50%),
+    linear-gradient(165deg, #0c0c0c 0%, #070707 60%, #050505 100%);
+}
+
+/* Fine noise-like overlay for a premium textured feel. */
+.stage::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: screen;
+}
+
+/* ---- Board shell -------------------------------------------------------- */
+.board {
+  width: min(1280px, 100%);
+  aspect-ratio: 16 / 9;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent 30%),
+    linear-gradient(160deg, #131313 0%, #0c0c0c 55%, #0a0a0a 100%);
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  padding: clamp(14px, 1.7vw, 26px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.2vw, 16px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 40px 120px -40px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.boardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: clamp(8px, 1vw, 12px);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.boardHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.boardKicker {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: var(--graphite);
+  text-transform: uppercase;
+}
+
+.boardHeaderRight {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+/* ---- Grid --------------------------------------------------------------- */
+.grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1.18fr 1fr 1.12fr;
+  grid-template-rows: 1.78fr 1.12fr 0.6fr;
+  grid-template-areas:
+    'hero  hero  mark'
+    'light icons apps'
+    'system system system';
+  gap: clamp(12px, 1.4vw, 20px);
+  min-height: 0;
+}
+
+.panel {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  padding: clamp(16px, 1.6vw, 26px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panelLabel {
+  font-size: 10px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.panelLabel[data-on='light'] {
+  color: rgba(10, 10, 10, 0.55);
+}
+
+.divider {
+  display: block;
+  height: 1px;
+  width: 100%;
+  margin: clamp(12px, 1.4vw, 18px) 0;
+  background: linear-gradient(90deg, transparent, var(--hairline-strong), transparent);
+}
+
+/* ---- 1. Hero ------------------------------------------------------------ */
+.hero {
+  grid-area: hero;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: clamp(8px, 1vw, 14px);
+  background:
+    radial-gradient(78% 70% at 50% 44%, rgba(200, 169, 106, 0.08), transparent 60%), var(--panel);
+}
+
+.heroLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: clamp(16px, 1.7vw, 25px);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--ivory);
+}
+
+.goldLine {
+  width: 56px;
+  height: 2px;
+  background: var(--gold);
+}
+
+.heroCenter {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.4vw, 20px);
+  min-height: 0;
+}
+
+.heroMark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- 2. Mark only ------------------------------------------------------- */
+.markOnly {
+  grid-area: mark;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.markRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(10px, 1.4vw, 18px) 0;
+  flex: 1;
+}
+
+/* ---- 3. Light background ------------------------------------------------ */
+.light {
+  grid-area: light;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 14px;
+  background: linear-gradient(180deg, #ffffff, var(--ivory));
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 24px 60px -36px rgba(0, 0, 0, 0.8);
+}
+
+.light .panelLabel {
+  position: absolute;
+  top: clamp(16px, 1.6vw, 22px);
+  left: clamp(16px, 1.6vw, 22px);
+}
+
+.lightMark {
+  margin-top: 6px;
+}
+
+/* ---- 4. App icons ------------------------------------------------------- */
+.icons {
+  grid-area: icons;
+  align-items: center;
+}
+
+.iconRow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 2vw, 30px);
+}
+
+.appIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.appIcon[data-tone='obsidian'] {
+  background: linear-gradient(155deg, #1a1a1a 0%, #0a0a0a 70%);
+  border: 1px solid rgba(200, 169, 106, 0.18);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 18px 40px -18px rgba(0, 0, 0, 0.95);
+}
+
+.appIcon[data-tone='ivory'] {
+  background: linear-gradient(155deg, #ffffff 0%, #ececea 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 18px 40px -18px rgba(0, 0, 0, 0.7);
+}
+
+/* ---- 5. Brand applications ---------------------------------------------- */
+.apps {
+  grid-area: apps;
+  gap: clamp(12px, 1.4vw, 18px);
+}
+
+.nav {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #161616, #0d0d0d);
+  border: 1px solid var(--hairline);
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.navWord {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  color: var(--ivory);
+}
+
+.navWordRev {
+  color: var(--gold);
+}
+
+.navItems {
+  display: flex;
+  align-items: center;
+  gap: clamp(7px, 0.7vw, 12px);
+}
+
+.navItem {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--graphite);
+  white-space: nowrap;
+}
+
+.navSlash {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.cardStage {
+  position: relative;
+  flex: 1;
+  min-height: 120px;
+  margin-top: 8px;
+}
+
+.card {
+  position: absolute;
+  width: clamp(132px, 54%, 184px);
+  aspect-ratio: 1.7 / 1;
+  border-radius: 9px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cardObsidian {
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(150deg, #1c1c1c 0%, #0a0a0a 75%);
+  border: 1px solid rgba(200, 169, 106, 0.2);
+  box-shadow: 0 22px 48px -20px rgba(0, 0, 0, 0.95);
+}
+
+.cardIvory {
+  z-index: 1;
+  left: 0;
+  top: 0;
+  background: linear-gradient(150deg, #ffffff 0%, #eceae6 100%);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.7);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.cardTop {
+  display: flex;
+}
+
+.cardBottom {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardTagline {
+  font-size: 7px;
+  letter-spacing: 0.24em;
+  color: var(--graphite);
+  text-transform: uppercase;
+}
+
+.cardUrl {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+
+/* ---- 6. System row ------------------------------------------------------ */
+.system {
+  grid-area: system;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(18px, 2.4vw, 40px);
+}
+
+.systemCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.systemDivider {
+  width: 1px;
+  align-self: stretch;
+  background: linear-gradient(180deg, transparent, var(--hairline-strong), transparent);
+}
+
+.swatches {
+  display: flex;
+  gap: clamp(10px, 1.2vw, 18px);
+  flex-wrap: wrap;
+}
+
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.swatchChip {
+  width: clamp(34px, 3vw, 46px);
+  height: clamp(34px, 3vw, 46px);
+  border-radius: 6px;
+  border: 1px solid var(--hairline-strong);
+  box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.8);
+}
+
+.swatchMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.swatchName {
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+.swatchHex {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: rgba(246, 246, 244, 0.72);
+  font-variant-numeric: tabular-nums;
+}
+
+.typeRow {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.6vw, 22px);
+}
+
+.typeAa {
+  font-size: clamp(40px, 4.4vw, 64px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--ivory);
+}
+
+.typeMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.typeStack {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ivory);
+}
+
+.typeSub {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--graphite);
+}
+
+/* ---- Wordmark ----------------------------------------------------------- */
+.wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.34em;
+  line-height: 1;
+}
+
+.wordmarkRow {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.32em;
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.wordmark[data-surface='dark'] .wordmarkLast {
+  color: var(--ivory);
+}
+
+.wordmark[data-surface='light'] .wordmarkLast {
+  color: #0a0a0a;
+}
+
+.wordmarkRev {
+  color: var(--gold);
+}
+
+.tagline {
+  font-size: 0.32em;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  padding-left: 0.42em;
+}
+
+.wordmark[data-surface='light'] .tagline {
+  color: rgba(10, 10, 10, 0.5);
+}
+
+/* =========================================================================
+   Responsive — desktop-first. Stack panels vertically on smaller screens.
+   ========================================================================= */
+@media (max-width: 1024px) {
+  .board {
+    aspect-ratio: auto;
+  }
+
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
+    grid-template-areas:
+      'hero  hero'
+      'mark  light'
+      'icons apps'
+      'system system';
+  }
+}
+
+@media (max-width: 680px) {
+  .board {
+    padding: 16px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'hero'
+      'mark'
+      'light'
+      'icons'
+      'apps'
+      'system';
+  }
+
+  .system {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .systemDivider {
+    width: 100%;
+    height: 1px;
+  }
+
+  .boardHeaderRight {
+    display: none;
+  }
+}

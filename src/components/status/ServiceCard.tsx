@@ -39,8 +39,11 @@ export default function ServiceCard({ service }: { service: ServiceStatus }) {
         display: 'flex',
         flexDirection: 'column',
         borderLeft: `3px solid ${v.main}`,
-        transition: 'border-color 0.2s ease, transform 0.2s ease',
-        '&:hover': { boxShadow: `0 0 0 1px ${v.main}33, 0 8px 30px -12px ${v.glow}` },
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          borderColor: 'rgba(200,169,106,0.35)',
+          boxShadow: `0 0 0 1px ${v.main}2e, 0 20px 44px -22px rgba(0,0,0,0.95)`,
+        },
       }}
     >
       <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1.5, flexGrow: 1 }}>
