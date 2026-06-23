@@ -113,18 +113,18 @@ function dedupeById(incidents: Incident[]): Incident[] {
 
 function deriveServiceLevel(
   active: Incident[],
-  recent: Incident[],
   maintenance: Incident[],
 ): ServiceStatusLevel {
-  // Red (partial/major outage) is reserved for incidents that are ACTIVE and
-  // unresolved right now — surfaced at their real severity. A resolved incident
-  // (or maintenance) must never make a healthy service look critical.
+  // Status reflects the live state only. Red (partial/major outage) and yellow
+  // (degraded) are reserved for incidents that are ACTIVE and unresolved right
+  // now — surfaced at their real severity. Once an incident is resolved the
+  // service returns to operational immediately; the just-resolved incident
+  // still appears in `recentIncidents` history, but it must not keep the
+  // service looking unhealthy (which would contradict its "Resolved" label).
   if (active.length > 0) {
     return severityToLevel(worstSeverity(active.map((i) => i.severity)));
   }
   if (maintenance.some((i) => i.isCurrentMaintenance)) return 'maintenance';
-  // Recently-resolved incidents leave a soft caution signal (yellow), not red.
-  if (recent.some((i) => i.isRecent)) return 'degraded';
   return 'operational';
 }
 
@@ -209,17 +209,13 @@ export function buildServiceStatus(
   if (overrideActive && config.manualStatusOverride) {
     level = config.manualStatusOverride;
   } else {
-    level = deriveServiceLevel(
-      activeIncidents,
-      [...activeIncidents, ...recentIncidents],
-      scheduledMaintenance,
-    );
+    level = deriveServiceLevel(activeIncidents, scheduledMaintenance);
   }
 
   const severity =
     level === 'maintenance'
       ? 'maintenance'
-      : worstSeverity([...activeIncidents, ...recentIncidents].map((i) => i.severity));
+      : worstSeverity(activeIncidents.map((i) => i.severity));
 
   const lastIncidentAt = incidents[0]?.publishedAt ?? null;
 

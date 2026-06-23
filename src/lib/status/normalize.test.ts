@@ -53,7 +53,10 @@ describe('buildServiceStatus', () => {
     expect(s.activeIncidents).toHaveLength(0);
   });
 
-  it('is degraded (yellow) for a recent resolved incident within 24h', () => {
+  it('is operational for a recent resolved incident, but keeps it in history', () => {
+    // A resolved incident returns the service to operational immediately so the
+    // status never contradicts the incident's "Resolved" label; the incident
+    // still surfaces under recentIncidents history.
     const s = build([
       raw({
         title: 'API latency',
@@ -61,17 +64,18 @@ describe('buildServiceStatus', () => {
         contentHtml: 'Resolved - back to normal',
       }),
     ]);
-    expect(s.statusTone).toBe('degraded');
+    expect(s.statusTone).toBe('operational');
+    expect(s.activeIncidents).toHaveLength(0);
     expect(s.recentIncidents.length).toBeGreaterThan(0);
   });
 
-  it('does not escalate a very recently RESOLVED incident to red (stays degraded)', () => {
-    // A resolved incident must not make a healthy service look critical, even
-    // within the very-recent window. Red is reserved for active incidents.
+  it('does not flag a very recently RESOLVED incident as needing attention', () => {
+    // A resolved incident must not make a healthy service look unhealthy, even
+    // within the very-recent window. Color is reserved for active incidents.
     const s = build([
       raw({ title: 'Errors', publishedAt: hoursAgo(2), contentHtml: 'Resolved - mitigated' }),
     ]);
-    expect(s.statusTone).toBe('degraded');
+    expect(s.statusTone).toBe('operational');
     expect(s.activeIncidents).toHaveLength(0);
   });
 
