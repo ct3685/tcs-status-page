@@ -111,10 +111,7 @@ function dedupeById(incidents: Incident[]): Incident[] {
   return [...seen.values()];
 }
 
-function deriveServiceLevel(
-  active: Incident[],
-  maintenance: Incident[],
-): ServiceStatusLevel {
+function deriveServiceLevel(active: Incident[], maintenance: Incident[]): ServiceStatusLevel {
   // Status reflects the live state only. Red (partial/major outage) and yellow
   // (degraded) are reserved for incidents that are ACTIVE and unresolved right
   // now — surfaced at their real severity. Once an incident is resolved the
@@ -213,9 +210,7 @@ export function buildServiceStatus(
   }
 
   const severity =
-    level === 'maintenance'
-      ? 'maintenance'
-      : worstSeverity(activeIncidents.map((i) => i.severity));
+    level === 'maintenance' ? 'maintenance' : worstSeverity(activeIncidents.map((i) => i.severity));
 
   const lastIncidentAt = incidents[0]?.publishedAt ?? null;
 
