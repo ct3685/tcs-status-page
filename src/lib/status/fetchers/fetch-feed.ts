@@ -1,5 +1,6 @@
-import { FEED_HOST_ALLOWLIST, thresholds } from '../config';
-import { serverEnv } from '../../env';
+import { lookup } from 'node:dns/promises';
+import type { LookupAddress } from 'node:dns';
+import { thresholds } from '../config';
 
 export class FeedFetchError extends Error {
   constructor(
@@ -23,48 +24,96 @@ function isIpLiteral(hostname: string): boolean {
   if (hostname.includes(':') || IPV4.test(hostname)) return true;
   // Reject obfuscated IPv4 forms that resolve to an address but dodge the regex:
   // decimal (2130706433), hex (0x7f000001), octal (0177.0.0.1), and short
-  // (127.1) notations. A legitimate DNS hostname has at least one label that
-  // is not purely numeric/hex, so an all-numeric host is treated as an IP.
+  // (127.1) notations. A legitimate DNS hostname has at least one label that is
+  // not purely numeric/hex, so an all-numeric host is treated as an IP.
   const labels = hostname.split('.');
   return labels.every((label) => label.length > 0 && isNumericLabel(label));
 }
 
-const MAX_REDIRECTS = 3;
+/** True for an IPv4 address in any private, loopback, link-local, or reserved range. */
+function isPrivateIpv4(ip: string): boolean {
+  const parts = ip.split('.').map((n) => Number(n));
+  if (parts.length !== 4 || parts.some((n) => Number.isNaN(n) || n < 0 || n > 255)) {
+    return true; // malformed -> treat as unsafe
+  }
+  const [a, b] = parts as [number, number, number, number];
+  if (a === 0) return true; // 0.0.0.0/8
+  if (a === 10) return true; // 10.0.0.0/8
+  if (a === 127) return true; // loopback
+  if (a === 169 && b === 254) return true; // link-local / cloud metadata
+  if (a === 172 && b >= 16 && b <= 31) return true; // 172.16.0.0/12
+  if (a === 192 && b === 168) return true; // 192.168.0.0/16
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT 100.64.0.0/10
+  if (a === 198 && (b === 18 || b === 19)) return true; // benchmarking 198.18.0.0/15
+  if (a >= 224) return true; // multicast + reserved
+  return false;
+}
 
-function allowedHosts(): Set<string> {
-  const extra = (serverEnv().ALLOWED_FEED_HOSTNAMES ?? '')
-    .split(',')
-    .map((h) => h.trim().toLowerCase())
-    .filter(Boolean);
-  return new Set([...FEED_HOST_ALLOWLIST.map((h) => h.toLowerCase()), ...extra]);
+/** True for an IP (v4 or v6) that must not be fetched (SSRF defense). */
+function isPrivateAddress(ip: string): boolean {
+  const addr = ip.toLowerCase();
+  if (addr.includes(':')) {
+    if (addr === '::1' || addr === '::') return true; // loopback / unspecified
+    if (/^fe[89ab]/.test(addr)) return true; // link-local fe80::/10
+    if (/^f[cd]/.test(addr)) return true; // unique-local fc00::/7
+    if (addr.startsWith('ff')) return true; // multicast
+    const mapped = addr.match(/(?:::ffff:)(\d+\.\d+\.\d+\.\d+)$/);
+    if (mapped?.[1]) return isPrivateIpv4(mapped[1]);
+    return false;
+  }
+  return isPrivateIpv4(addr);
 }
 
 /**
- * Validate a feed URL before fetching. Defends against SSRF: HTTPS only, no IP
- * literals / localhost, and the hostname must be on the allowlist.
+ * Validate a feed URL before fetching. Feed URLs are configured by trusted admins
+ * in Sanity, so there is no host allowlist to babysit; instead we block the
+ * targets that actually matter for SSRF: non-HTTP(S) schemes, localhost/internal
+ * hostnames, IP-literal URLs, and any hostname that resolves to a private,
+ * loopback, link-local, or cloud-metadata address.
  */
-export function validateFeedUrl(rawUrl: string): URL {
+export async function validateFeedUrl(rawUrl: string): Promise<URL> {
   let url: URL;
   try {
     url = new URL(rawUrl);
   } catch {
     throw new FeedFetchError(`Invalid feed URL: ${rawUrl}`);
   }
-  if (url.protocol !== 'https:') {
-    throw new FeedFetchError(`Feed URL must be HTTPS: ${rawUrl}`);
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new FeedFetchError(`Feed URL must be http(s): ${rawUrl}`);
   }
   const host = url.hostname.toLowerCase();
-  if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal')) {
+  if (
+    host === 'localhost' ||
+    host.endsWith('.local') ||
+    host.endsWith('.localhost') ||
+    host.endsWith('.internal')
+  ) {
     throw new FeedFetchError(`Blocked hostname: ${host}`);
   }
   if (isIpLiteral(host)) {
     throw new FeedFetchError(`IP-literal feed URLs are not allowed: ${host}`);
   }
-  if (!allowedHosts().has(host)) {
-    throw new FeedFetchError(`Hostname not in feed allowlist: ${host}`);
+
+  // Resolve and reject if any address is private/reserved. This replaces the
+  // static allowlist while still preventing access to internal/metadata hosts.
+  let addresses: LookupAddress[];
+  try {
+    addresses = await lookup(host, { all: true });
+  } catch {
+    throw new FeedFetchError(`Could not resolve feed hostname: ${host}`);
+  }
+  if (addresses.length === 0) {
+    throw new FeedFetchError(`Feed hostname did not resolve: ${host}`);
+  }
+  for (const { address } of addresses) {
+    if (isPrivateAddress(address)) {
+      throw new FeedFetchError(`Feed hostname resolves to a blocked address: ${host}`);
+    }
   }
   return url;
 }
+
+const MAX_REDIRECTS = 5;
 
 export interface FetchTextOptions {
   timeoutMs?: number;
@@ -102,9 +151,10 @@ async function readCappedText(res: Response, maxBytes: number): Promise<string> 
  * Fetch text with an abort timeout and a hard response-size cap.
  *
  * Redirects are followed manually (redirect: 'manual') so each hop's target is
- * re-validated through validateFeedUrl. Without this, an allowlisted host could
- * 302 to a private/metadata address (e.g. 169.254.169.254) and bypass SSRF
- * controls that only ran against the original URL.
+ * re-validated through validateFeedUrl. Without this, a host could 30x to a
+ * private/metadata address and bypass the SSRF controls that ran on the
+ * original URL. Providers commonly redirect through an http:// hop or to a new
+ * hostname, so both are tolerated as long as each hop passes validation.
  */
 export async function fetchFeedText(
   rawUrl: string,
@@ -117,7 +167,7 @@ export async function fetchFeedText(
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    let url = validateFeedUrl(rawUrl);
+    let url = await validateFeedUrl(rawUrl);
     let redirects = 0;
 
     for (;;) {
@@ -143,7 +193,7 @@ export async function fetchFeedText(
         redirects += 1;
         // Resolve relative redirects against the current URL, then re-validate.
         const next = new URL(location, url).toString();
-        url = validateFeedUrl(next);
+        url = await validateFeedUrl(next);
         continue;
       }
 

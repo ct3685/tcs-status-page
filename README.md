@@ -67,7 +67,6 @@ pnpm dev               # http://localhost:3000  (Studio at /studio)
 | `NEXT_PUBLIC_SANITY_API_VERSION` | public | Sanity API version                                        |
 | `SANITY_READ_TOKEN`              | server | Read token (dataset is private); also used by `pnpm seed` |
 | `SANITY_REVALIDATE_SECRET`       | server | Guards `/api/revalidate` (Sanity webhook)                 |
-| `ALLOWED_FEED_HOSTNAMES`         | server | Optional comma-separated SSRF allowlist additions         |
 
 > `NEXT_PUBLIC_*` values are inlined at **build time** — changing them on Netlify requires a rebuild.
 
