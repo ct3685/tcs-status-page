@@ -171,17 +171,6 @@ export const SEED_SERVICES: ServiceConfig[] = [
     order: 13,
   }),
   service({
-    slug: 'sentry',
-    name: 'Sentry',
-    feedUrl: 'https://status.sentry.io/history.rss',
-    externalStatusPageUrl: 'https://status.sentry.io/',
-    feedType: 'atlassianStatuspageRss',
-    logo: '/images/sentryLogo.png',
-    category: { name: 'Developer Tools', slug: 'developer-tools' },
-    criticality: 'normal',
-    order: 14,
-  }),
-  service({
     slug: 'npm',
     name: 'npm',
     feedUrl: 'https://status.npmjs.org/history.rss',
