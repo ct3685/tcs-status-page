@@ -42,6 +42,20 @@ const theme = createTheme({
     button: { textTransform: 'none', fontWeight: 600, letterSpacing: '0.015em' },
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        // Respect users who prefer reduced motion: neutralize the hover lifts,
+        // collapse animations, and icon rotations used across the dashboard.
+        '@media (prefers-reduced-motion: reduce)': {
+          '*, *::before, *::after': {
+            animationDuration: '0.01ms !important',
+            animationIterationCount: '1 !important',
+            transitionDuration: '0.01ms !important',
+            scrollBehavior: 'auto !important',
+          },
+        },
+      },
+    },
     MuiPaper: {
       styleOverrides: { root: { backgroundImage: 'none' } },
     },

@@ -86,6 +86,7 @@ export default function IncidentTimeline({ incidents }: { incidents: Incident[] 
                   href={incident.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="View on status page (opens in a new tab)"
                   sx={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -94,7 +95,7 @@ export default function IncidentTimeline({ incidents }: { incidents: Incident[] 
                     fontSize: 14,
                   }}
                 >
-                  View on status page <OpenInNewRoundedIcon sx={{ fontSize: 14 }} />
+                  View on status page <OpenInNewRoundedIcon sx={{ fontSize: 14 }} aria-hidden />
                 </Link>
               )}
             </AccordionDetails>

@@ -19,7 +19,6 @@ const publicSchema = z.object({
 const serverSchema = z.object({
   SANITY_READ_TOKEN: z.string().optional(),
   SANITY_REVALIDATE_SECRET: z.string().optional(),
-  STATUS_CRON_SECRET: z.string().optional(),
   // Comma-separated allowlist of additional feed hostnames (optional).
   ALLOWED_FEED_HOSTNAMES: z.string().optional(),
 });
@@ -38,7 +37,6 @@ export function serverEnv(): z.infer<typeof serverSchema> {
   cachedServerEnv = serverSchema.parse({
     SANITY_READ_TOKEN: process.env.SANITY_READ_TOKEN,
     SANITY_REVALIDATE_SECRET: process.env.SANITY_REVALIDATE_SECRET,
-    STATUS_CRON_SECRET: process.env.STATUS_CRON_SECRET,
     ALLOWED_FEED_HOSTNAMES: process.env.ALLOWED_FEED_HOSTNAMES,
   });
   return cachedServerEnv;

@@ -1,4 +1,4 @@
-import { sanityClient } from './client';
+import { getSanityClient } from './client';
 import type { ManualIncidentInput } from '../status/fetchers/manual';
 import type {
   Criticality,
@@ -111,9 +111,10 @@ function mapService(raw: RawService): ServiceConfig | null {
     slug: raw.slug,
     name: raw.name,
     description: raw.shortDescription,
-    category: raw.category?.name && raw.category.slug
-      ? { name: raw.category.name, slug: raw.category.slug }
-      : undefined,
+    category:
+      raw.category?.name && raw.category.slug
+        ? { name: raw.category.name, slug: raw.category.slug }
+        : undefined,
     logo: raw.logo ?? undefined,
     externalStatusPageUrl: raw.externalStatusPageUrl,
     feedUrl: raw.feedUrl,
@@ -144,22 +145,32 @@ export interface StatusPageSettings {
   ogImage: string | null;
   indexable: boolean;
   displayMode: 'grid' | 'compact';
-  announcement: { enabled?: boolean; message?: string; tone?: 'info' | 'warning' | 'critical' } | null;
+  announcement: {
+    enabled?: boolean;
+    message?: string;
+    tone?: 'info' | 'warning' | 'critical';
+  } | null;
   supportCtaLabel: string | null;
   supportCtaUrl: string | null;
 }
 
 export async function fetchSanitySettings(): Promise<StatusPageSettings | null> {
-  return sanityClient.fetch<StatusPageSettings | null>(SETTINGS_QUERY);
+  const client = getSanityClient();
+  if (!client) return null;
+  return client.fetch<StatusPageSettings | null>(SETTINGS_QUERY);
 }
 
 export async function fetchSanityServices(): Promise<ServiceConfig[]> {
-  const raw = await sanityClient.fetch<RawService[]>(SERVICES_QUERY);
+  const client = getSanityClient();
+  if (!client) return [];
+  const raw = await client.fetch<RawService[]>(SERVICES_QUERY);
   return raw.map(mapService).filter((s): s is ServiceConfig => s !== null);
 }
 
 export async function fetchSanityManualIncidents(): Promise<Record<string, ManualIncidentInput[]>> {
-  const raw = await sanityClient.fetch<RawManualIncident[]>(MANUAL_INCIDENTS_QUERY);
+  const client = getSanityClient();
+  if (!client) return {};
+  const raw = await client.fetch<RawManualIncident[]>(MANUAL_INCIDENTS_QUERY);
   const bySlug: Record<string, ManualIncidentInput[]> = {};
   for (const incident of raw) {
     const input: ManualIncidentInput = {

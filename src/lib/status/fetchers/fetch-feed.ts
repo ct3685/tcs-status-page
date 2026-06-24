@@ -13,10 +13,23 @@ export class FeedFetchError extends Error {
 
 const IPV4 = /^\d{1,3}(\.\d{1,3}){3}$/;
 
-function isIpLiteral(hostname: string): boolean {
-  // IPv6 literals arrive bracketed; bare IPv4 matches the regex.
-  return hostname.includes(':') || IPV4.test(hostname);
+function isNumericLabel(label: string): boolean {
+  // Decimal (127, 2130706433), hex (0x7f), or octal (0177) octet forms.
+  return /^0x[0-9a-f]+$/i.test(label) || /^[0-9]+$/.test(label);
 }
+
+function isIpLiteral(hostname: string): boolean {
+  // IPv6 literals contain a colon; canonical dotted-quad IPv4 matches the regex.
+  if (hostname.includes(':') || IPV4.test(hostname)) return true;
+  // Reject obfuscated IPv4 forms that resolve to an address but dodge the regex:
+  // decimal (2130706433), hex (0x7f000001), octal (0177.0.0.1), and short
+  // (127.1) notations. A legitimate DNS hostname has at least one label that
+  // is not purely numeric/hex, so an all-numeric host is treated as an IP.
+  const labels = hostname.split('.');
+  return labels.every((label) => label.length > 0 && isNumericLabel(label));
+}
+
+const MAX_REDIRECTS = 3;
 
 function allowedHosts(): Set<string> {
   const extra = (serverEnv().ALLOWED_FEED_HOSTNAMES ?? '')
@@ -59,12 +72,44 @@ export interface FetchTextOptions {
   accept?: string;
 }
 
-/** Fetch text with an abort timeout and a hard response-size cap. */
+/** Read a response body as text, aborting once it exceeds maxBytes. */
+async function readCappedText(res: Response, maxBytes: number): Promise<string> {
+  if (!res.body) {
+    const text = await res.text();
+    if (text.length > maxBytes) throw new FeedFetchError('Response exceeded size limit');
+    return text;
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let total = 0;
+  let out = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new FeedFetchError('Response exceeded size limit');
+    }
+    out += decoder.decode(value, { stream: true });
+  }
+  out += decoder.decode();
+  return out;
+}
+
+/**
+ * Fetch text with an abort timeout and a hard response-size cap.
+ *
+ * Redirects are followed manually (redirect: 'manual') so each hop's target is
+ * re-validated through validateFeedUrl. Without this, an allowlisted host could
+ * 302 to a private/metadata address (e.g. 169.254.169.254) and bypass SSRF
+ * controls that only ran against the original URL.
+ */
 export async function fetchFeedText(
   rawUrl: string,
   options: FetchTextOptions = {},
 ): Promise<string> {
-  const url = validateFeedUrl(rawUrl);
   const timeoutMs = options.timeoutMs ?? thresholds.defaultTimeoutMs;
   const maxBytes = options.maxBytes ?? thresholds.maxResponseBytes;
 
@@ -72,42 +117,41 @@ export async function fetchFeedText(
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const res = await fetch(url, {
-      signal: controller.signal,
-      redirect: 'follow',
-      headers: {
-        accept:
-          options.accept ??
-          'application/rss+xml, application/atom+xml, application/xml, text/xml, application/json;q=0.9, */*;q=0.5',
-        'user-agent': 'LastRevStatusBot/2.0 (+https://status.lastrev.com)',
-      },
-    });
+    let url = validateFeedUrl(rawUrl);
+    let redirects = 0;
 
-    if (!res.ok) {
-      throw new FeedFetchError(`Upstream responded ${res.status}`);
-    }
-    if (!res.body) {
-      const text = await res.text();
-      if (text.length > maxBytes) throw new FeedFetchError('Response exceeded size limit');
-      return text;
-    }
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let total = 0;
-    let out = '';
     for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      total += value.byteLength;
-      if (total > maxBytes) {
-        await reader.cancel();
-        throw new FeedFetchError('Response exceeded size limit');
+      const res = await fetch(url, {
+        signal: controller.signal,
+        redirect: 'manual',
+        headers: {
+          accept:
+            options.accept ??
+            'application/rss+xml, application/atom+xml, application/xml, text/xml, application/json;q=0.9, */*;q=0.5',
+          'user-agent': 'LastRevStatusBot/2.0 (+https://status.lastrev.com)',
+        },
+      });
+
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get('location');
+        if (!location) {
+          throw new FeedFetchError(`Redirect (${res.status}) without a Location header`);
+        }
+        if (redirects >= MAX_REDIRECTS) {
+          throw new FeedFetchError(`Too many redirects (> ${MAX_REDIRECTS})`);
+        }
+        redirects += 1;
+        // Resolve relative redirects against the current URL, then re-validate.
+        const next = new URL(location, url).toString();
+        url = validateFeedUrl(next);
+        continue;
       }
-      out += decoder.decode(value, { stream: true });
+
+      if (!res.ok) {
+        throw new FeedFetchError(`Upstream responded ${res.status}`);
+      }
+      return await readCappedText(res, maxBytes);
     }
-    out += decoder.decode();
-    return out;
   } catch (err) {
     if (err instanceof FeedFetchError) throw err;
     if (err instanceof Error && err.name === 'AbortError') {

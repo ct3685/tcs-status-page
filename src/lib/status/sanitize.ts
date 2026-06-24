@@ -31,7 +31,9 @@ export function sanitizeFeedHtml(input: string | null | undefined): string {
   if (!input) return '';
   return sanitizeHtml(input, {
     allowedTags: ALLOWED_TAGS,
-    allowedAttributes: { a: ['href', 'title'] },
+    // target/rel must be allowed for the transformTags additions below to
+    // survive sanitization; otherwise the noopener hardening is silently dropped.
+    allowedAttributes: { a: ['href', 'title', 'target', 'rel'] },
     allowedSchemes: ['https', 'mailto'],
     transformTags: {
       a: (tagName, attribs) => ({

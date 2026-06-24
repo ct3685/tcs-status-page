@@ -49,6 +49,7 @@ export default function AppHeader() {
               href="https://www.lastrev.com"
               target="_blank"
               rel="noopener"
+              aria-label="LastRev.com (opens in a new tab)"
               sx={{
                 fontFamily: 'var(--font-space-grotesk), var(--font-inter), sans-serif',
                 fontSize: '0.72rem',

@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               borderRadius: 1,
               bgcolor: 'background.paper',
               color: 'text.primary',
-              '&:focus': { left: 8, top: 8 },
+              '&:focus-visible': { left: 8, top: 8 },
             }}
           >
             Skip to content

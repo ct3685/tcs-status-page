@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
-import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -58,11 +57,11 @@ export default function MaintenancePanel({ services }: { services: ServiceStatus
             {items.length} upcoming or in-progress {items.length === 1 ? 'window' : 'windows'}
           </Typography>
         </Box>
-        <IconButton component="span" size="small" aria-hidden tabIndex={-1}>
+        <Box component="span" sx={{ display: 'inline-flex', color: 'text.secondary' }} aria-hidden>
           <ExpandMoreRoundedIcon
             sx={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
           />
-        </IconButton>
+        </Box>
       </Box>
       <Collapse in={open} unmountOnExit>
         <Box id="maintenance-list" sx={{ px: 2, pb: 2 }}>

@@ -84,7 +84,7 @@ export default function ServiceCard({ service }: { service: ServiceStatus }) {
               {service.pinned && (
                 <PushPinRoundedIcon
                   sx={{ fontSize: 14, color: 'text.secondary' }}
-                  aria-label="Pinned"
+                  titleAccess="Pinned"
                 />
               )}
             </Stack>
@@ -170,9 +170,10 @@ export default function ServiceCard({ service }: { service: ServiceStatus }) {
             target="_blank"
             rel="noopener noreferrer"
             variant="body2"
+            aria-label={`${service.name} status page (opens in a new tab)`}
             sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
           >
-            Status page <OpenInNewRoundedIcon sx={{ fontSize: 14 }} />
+            Status page <OpenInNewRoundedIcon sx={{ fontSize: 14 }} aria-hidden />
           </Link>
         )}
       </Box>
