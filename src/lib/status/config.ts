@@ -12,7 +12,13 @@ export const thresholds: StatusThresholds = {
   refreshIntervalSeconds: 180,
 };
 
-/** Hostnames the pipeline is allowed to fetch from (plus any in ALLOWED_FEED_HOSTNAMES). */
+/**
+ * Hostnames the pipeline is allowed to fetch from (plus any in
+ * ALLOWED_FEED_HOSTNAMES). Feeds are fetched with manual redirect handling and
+ * every hop is re-validated against this list, so when a provider 301s its feed
+ * to a new hostname (rebrands, product renames) the redirect TARGET must be
+ * listed here too — not just the original URL.
+ */
 export const FEED_HOST_ALLOWLIST: readonly string[] = [
   'status.heroku.com',
   'www.netlifystatus.com',
@@ -20,7 +26,12 @@ export const FEED_HOST_ALLOWLIST: readonly string[] = [
   'status.cloudways.com',
   'status.sentry.io',
   'jira-service-desk.status.atlassian.com',
+  // Atlassian renamed Jira Service Desk -> Jira Service Management; the old feed
+  // host redirects here.
+  'jira-service-management.status.atlassian.com',
   'status.zoom.us',
+  // status.zoom.us redirects here.
+  'www.zoomstatus.com',
   'www.contentfulstatus.com',
   'status.formassembly.com',
   'www.githubstatus.com',
@@ -28,11 +39,16 @@ export const FEED_HOST_ALLOWLIST: readonly string[] = [
   'status.tempo.io',
   'status.hubspot.com',
   'status.slack.com',
+  // status.slack.com redirects here.
+  'slack-status.com',
   'www.vercel-status.com',
   'status.sendgrid.com',
   'status.openai.com',
   'status.upstash.com',
   'status.anthropic.com',
+  // Anthropic's status moved under the Claude brand; status.anthropic.com
+  // redirects here.
+  'status.claude.com',
   'status.bitwarden.com',
   'status.lastpass.com',
   'status.smartling.com',
