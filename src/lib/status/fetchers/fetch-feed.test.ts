@@ -55,7 +55,9 @@ describe('validateFeedUrl', () => {
 
   it('blocks hostnames that resolve to the cloud-metadata IP', async () => {
     lookupMock.mockResolvedValue([{ address: '169.254.169.254', family: 4 }] as never);
-    await expect(validateFeedUrl('https://rebind.example.com/x')).rejects.toThrow(/blocked address/);
+    await expect(validateFeedUrl('https://rebind.example.com/x')).rejects.toThrow(
+      /blocked address/,
+    );
   });
 
   it('blocks hostnames that resolve to private IPv6 (loopback/ULA/link-local)', async () => {
@@ -99,7 +101,9 @@ describe('fetchFeedText', () => {
 
   it('returns the body for a 200 response', async () => {
     fetchMock.mockResolvedValueOnce(new Response('<rss>ok</rss>', { status: 200 }));
-    await expect(fetchFeedText('https://status.example.com/feed')).resolves.toContain('<rss>ok</rss>');
+    await expect(fetchFeedText('https://status.example.com/feed')).resolves.toContain(
+      '<rss>ok</rss>',
+    );
   });
 
   it('uses manual redirect handling', async () => {
@@ -127,7 +131,9 @@ describe('fetchFeedText', () => {
       .mockResolvedValueOnce(PUBLIC as never) // initial host
       .mockResolvedValueOnce([{ address: '10.1.2.3', family: 4 }] as never); // redirect target
     fetchMock.mockResolvedValueOnce(redirect('https://internal.example.com/feed'));
-    await expect(fetchFeedText('https://status.example.com/feed')).rejects.toThrow(/blocked address/);
+    await expect(fetchFeedText('https://status.example.com/feed')).rejects.toThrow(
+      /blocked address/,
+    );
   });
 
   it('rejects a redirect without a Location header', async () => {
