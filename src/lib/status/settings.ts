@@ -2,11 +2,11 @@ import { isSanityConfigured } from '../env';
 import { fetchSanitySettings, type StatusPageSettings } from '../sanity/queries';
 
 export const DEFAULT_SETTINGS = {
-  title: 'Last Rev Services Status',
-  subtitle: 'A consolidated, real-time view of the various services the Last Rev team relies on.',
-  seoTitle: 'Last Rev Services Status',
+  title: 'TCS Repair Services Status',
+  subtitle: 'A consolidated, real-time view of the services TCS Repair relies on.',
+  seoTitle: 'TCS Repair Services Status',
   seoDescription:
-    'A consolidated, real-time status view of the various third-party services the Last Rev team relies on — operational, degraded, outage, and maintenance states at a glance.',
+    'A consolidated, real-time status view of the third-party services TCS Repair relies on — operational, degraded, outage, and maintenance states at a glance.',
   ogImage: null,
   indexable: true,
   displayMode: 'grid',

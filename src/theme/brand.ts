@@ -1,31 +1,29 @@
 /**
- * Bracket Forge — Last Rev brand tokens.
+ * TCS Repair brand tokens for the status dashboard (dark surfaces).
  *
- * Single source of truth for the premium identity system. Kept free of the
- * 'use client' directive so both Server and Client Components can import it.
- * The functional status colors live separately in ./tokens.ts and are NOT
+ * Functional status colors live separately in ./tokens.ts and are NOT
  * overridden here — operational/degraded/outage/maintenance keep their meaning.
  */
 export const brand = {
-  // Core surfaces
-  obsidian: '#0A0A0A',
-  charcoal: '#1B1B1B',
-  shadow: '#050505',
+  // Core surfaces (TCS ink family)
+  obsidian: '#07111f',
+  charcoal: '#111f2f',
+  shadow: '#050d16',
   // Ink
-  ivory: '#F6F6F4',
-  graphite: '#9A9A9A',
-  // Champagne gold accents
-  gold: '#C8A96A',
-  goldSoft: '#D8BE84',
-  goldDeep: '#9C7A3C',
+  ivory: '#f6fbff',
+  graphite: '#aebdca',
+  // Brand cyan accents (kept as gold* keys for theme compatibility)
+  gold: '#00aeef',
+  goldSoft: '#43d5ff',
+  goldDeep: '#007eae',
   // Lines
-  divider: 'rgba(246, 246, 244, 0.12)',
-  dividerSoft: 'rgba(246, 246, 244, 0.08)',
-  goldLine: 'rgba(200, 169, 106, 0.55)',
-  goldWash: 'rgba(200, 169, 106, 0.06)',
+  divider: 'rgba(246, 251, 255, 0.12)',
+  dividerSoft: 'rgba(246, 251, 255, 0.08)',
+  goldLine: 'rgba(0, 174, 239, 0.55)',
+  goldWash: 'rgba(0, 174, 239, 0.08)',
 } as const;
 
-/** Premium sans stack for body copy. Söhne is referenced for licensed envs. */
+/** Premium sans stack for body copy. */
 export const fontSans =
   'var(--font-inter), "Söhne", "Space Grotesk", "Helvetica Neue", Arial, sans-serif';
 
@@ -33,8 +31,8 @@ export const fontSans =
 export const fontDisplay =
   'var(--font-space-grotesk), var(--font-inter), "Söhne", "Helvetica Neue", Arial, sans-serif';
 
-/** Layered obsidian surface with soft gold lighting — used on <body>. */
+/** Layered ink surface with soft cyan lighting — used on <body>. */
 export const surfaceBackground =
-  'radial-gradient(120% 90% at 12% -10%, rgba(200,169,106,0.06), transparent 46%),' +
-  'radial-gradient(120% 120% at 100% 110%, rgba(200,169,106,0.04), transparent 50%),' +
-  'linear-gradient(165deg, #0C0C0C 0%, #080808 60%, #050505 100%)';
+  'radial-gradient(120% 90% at 12% -10%, rgba(0,174,239,0.08), transparent 46%),' +
+  'radial-gradient(120% 120% at 100% 110%, rgba(0,174,239,0.05), transparent 50%),' +
+  'linear-gradient(165deg, #0f1d2d 0%, #07111f 60%, #050d16 100%)';

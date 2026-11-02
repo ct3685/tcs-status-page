@@ -4,10 +4,8 @@ import { createTheme } from '@mui/material/styles';
 import { statusTokens } from './tokens';
 import { brand, fontSans, fontDisplay } from './brand';
 
-// Bracket Forge dark theme. Dark-first, executive-grade. Functional status
-// colors (success/warning/error/info) are preserved for semantic meaning; the
-// brand chrome leans on obsidian/charcoal surfaces, ivory ink, and selective
-// champagne gold accents.
+// TCS Repair dark theme. Functional status colors (success/warning/error/info)
+// are preserved for semantic meaning; chrome uses ink surfaces and cyan accents.
 const theme = createTheme({
   cssVariables: true,
   palette: {
@@ -81,9 +79,9 @@ const theme = createTheme({
             ownerState.color === 'primary' && {
               color: brand.obsidian,
               background: `linear-gradient(180deg, ${brand.goldSoft}, ${brand.gold})`,
-              boxShadow: '0 12px 26px -14px rgba(200,169,106,0.65)',
+              boxShadow: '0 12px 26px -14px rgba(0,174,239,0.45)',
               '&:hover': {
-                background: `linear-gradient(180deg, #E6D09A, ${brand.goldSoft})`,
+                background: `linear-gradient(180deg, #6adfff, ${brand.goldSoft})`,
                 transform: 'translateY(-1px)',
               },
             }),

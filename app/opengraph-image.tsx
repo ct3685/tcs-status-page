@@ -4,7 +4,7 @@ import { markStandaloneSvg, toDataUri } from '@/components/brand/markSvg';
 // Branded social preview (also used as the Twitter card image fallback).
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-export const alt = 'Last Rev — System Status';
+export const alt = 'TCS Repair — System Status';
 
 export default function OpengraphImage() {
   const mark = toDataUri(markStandaloneSvg('gold'));
@@ -19,19 +19,17 @@ export default function OpengraphImage() {
           alignItems: 'center',
           justifyContent: 'center',
           gap: 40,
-          color: '#F6F6F4',
+          color: '#f6fbff',
           background:
-            'radial-gradient(60% 65% at 50% 32%, rgba(200,169,106,0.10), rgba(10,10,10,0) 60%), linear-gradient(160deg, #141414 0%, #0A0A0A 60%, #060606 100%)',
+            'radial-gradient(60% 65% at 50% 32%, rgba(0,174,239,0.14), rgba(7,17,31,0) 60%), linear-gradient(160deg, #0f1d2d 0%, #07111f 60%, #050d16 100%)',
         }}
       >
-        <img width={520} height={280} src={mark} alt="" />
-        <div style={{ display: 'flex', fontSize: 88, fontWeight: 700, letterSpacing: 20 }}>
-          <span>LAST</span>
-          <span style={{ color: '#C8A96A', marginLeft: 26 }}>REV</span>
+        <img width={320} height={308} src={mark} alt="" />
+        <div style={{ display: 'flex', fontSize: 72, fontWeight: 700, letterSpacing: 16 }}>
+          <span>TCS</span>
+          <span style={{ color: '#00aeef', marginLeft: 26 }}>REPAIR</span>
         </div>
-        <div style={{ fontSize: 26, letterSpacing: 14, color: '#9A9A9A' }}>
-          BUILD. AUTOMATE. ACCELERATE.
-        </div>
+        <div style={{ fontSize: 24, letterSpacing: 10, color: '#aebdca' }}>SYSTEM STATUS</div>
       </div>
     ),
     { ...size },

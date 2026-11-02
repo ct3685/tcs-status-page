@@ -2,7 +2,7 @@
   "projects": [
     {
       "platform": "netlify",
-      "projectName": "lr-status-page",
+      "projectName": "tcs-status-page",
       "bwsProjectIds": {
         "prod": "c8f5cd81-0070-4327-b14a-b46e0127dcc6",
         "dev": "c8f5cd81-0070-4327-b14a-b46e0127dcc6",

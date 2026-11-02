@@ -1,66 +1,47 @@
 /**
- * Raw SVG-string builders for the Bracket Forge `</r>` mark.
- *
- * The React <LogoMark> component is great for the DOM, but favicons, app icons,
- * and OG images need plain SVG strings (served statically or embedded as data
- * URIs inside next/og <ImageResponse>). Geometry here mirrors LogoMark.tsx.
- *
- * No 'use client' — importable from server routes (icon/apple-icon/og/manifest).
+ * Raw SVG-string builders for the TCS Repair monogram.
+ * Used by favicons, apple-icon, and OG image data URIs.
  */
 
 export type MarkVariant = 'gold' | 'white' | 'black';
 
-const GOLD_STOPS =
-  '<stop offset="0%" stop-color="#F0E2C0"/>' +
-  '<stop offset="38%" stop-color="#D9BD7E"/>' +
-  '<stop offset="72%" stop-color="#C6A564"/>' +
-  '<stop offset="100%" stop-color="#9C7A3C"/>';
+const PATHS =
+  '<path d="M 331 436 L 286 468 L 261 489 L 229 521 L 204 550 L 174 592 L 145 642 L 125 684 L 104 742 L 94 779 L 88 810 L 83 854 L 83 905 L 91 969 L 101 1014 L 117 1061 L 132 1096 L 160 1148 L 191 1194 L 215 1224 L 256 1265 L 289 1291 L 329 1317 L 387 1347 L 463 1375 L 526 1390 L 602 1399 L 940 1398 L 940 1395 L 838 1225 L 592 1224 L 548 1219 L 489 1204 L 457 1191 L 434 1179 L 394 1152 L 354 1115 L 314 1063 L 299 1037 L 282 999 L 272 967 L 264 928 L 262 910 L 262 850 L 271 798 L 282 762 L 293 735 L 318 690 L 339 661 L 374 623 L 403 599 L 442 572 L 473 555 L 474 376 L 473 374 L 467 375 L 396 401 L 371 413 Z"/>' +
+  '<path d="M 667 542 L 1283 543 L 1314 488 L 1377 384 L 1387 364 L 667 363 Z"/>' +
+  '<path d="M 938 1199 L 940 1207 L 947 1216 L 948 1220 L 955 1230 L 960 1241 L 967 1250 L 968 1254 L 971 1257 L 972 1262 L 976 1266 L 988 1290 L 991 1293 L 1000 1311 L 1003 1314 L 1004 1318 L 1007 1321 L 1008 1325 L 1011 1328 L 1012 1332 L 1015 1335 L 1016 1339 L 1023 1349 L 1032 1367 L 1035 1370 L 1040 1382 L 1043 1385 L 1049 1397 L 1051 1398 L 1317 1398 L 1318 1399 L 1394 1398 L 1395 1395 L 1394 1391 L 1391 1389 L 1360 1336 L 1349 1320 L 1329 1284 L 1306 1249 L 1303 1241 L 1297 1234 L 1296 1230 L 1299 1228 L 1299 1226 L 1274 1225 L 1273 1224 L 1179 1223 L 1178 1222 L 1041 1222 L 1022 1220 L 989 1214 L 955 1205 Z"/>' +
+  '<path d="M 1764 696 L 1060 697 L 1021 704 L 977 719 L 950 733 L 917 755 L 881 791 L 869 806 L 851 836 L 831 883 L 823 916 L 819 947 L 819 973 L 823 1004 L 828 1027 L 838 1058 L 861 1107 L 874 1128 L 898 1159 L 939 1198 L 970 1208 L 1011 1217 L 1051 1221 L 1207 1221 L 1285 1223 L 1343 1228 L 1384 1234 L 1405 1239 L 1430 1249 L 1459 1266 L 1483 1287 L 1501 1310 L 1512 1332 L 1520 1356 L 1523 1372 L 1521 1403 L 1512 1433 L 1503 1451 L 1493 1465 L 1470 1487 L 1438 1506 L 1424 1511 L 1402 1515 L 597 1514 L 491 1684 L 487 1694 L 1422 1694 L 1457 1689 L 1501 1676 L 1534 1661 L 1575 1635 L 1596 1618 L 1621 1593 L 1640 1570 L 1658 1543 L 1682 1493 L 1692 1459 L 1698 1424 L 1700 1404 L 1699 1364 L 1694 1330 L 1686 1297 L 1675 1267 L 1654 1225 L 1626 1185 L 1593 1151 L 1553 1121 L 1504 1097 L 1463 1084 L 1404 1075 L 1319 1072 L 1087 1071 L 1071 1067 L 1054 1059 L 1037 1047 L 1023 1032 L 1014 1018 L 1003 986 L 1003 947 L 1013 921 L 1019 912 L 1032 899 L 1049 888 L 1075 880 L 1655 880 L 1658 878 L 1704 798 L 1762 703 Z"/>' +
+  '<path d="M 4 4 L 4 192 L 473 192 L 476 195 L 476 369 L 474 379 L 474 554 L 476 573 L 476 1104 L 526 1123 L 571 1134 L 616 1139 L 663 1139 L 664 548 L 666 544 L 666 393 L 664 362 L 663 254 L 664 194 L 670 191 L 1174 192 L 1263 26 L 1273 4 Z"/>';
 
-function paint(variant: MarkVariant, gradId: string): string {
-  if (variant === 'gold') return `url(#${gradId})`;
-  if (variant === 'white') return '#F6F6F4';
-  return '#0A0A0A';
+function paint(variant: MarkVariant): string {
+  if (variant === 'gold') return '#00aeef';
+  if (variant === 'white') return '#f6fbff';
+  return '#07111f';
 }
 
-/** The mark glyph (no outer <svg>), sized to a 0 0 342 184 viewBox. */
-function glyph(variant: MarkVariant, idSuffix: string): string {
-  const gradId = `bf-${idSuffix}`;
-  const fill = paint(variant, gradId);
-  const defs =
-    variant === 'gold'
-      ? `<defs><linearGradient id="${gradId}" x1="0.12" y1="0" x2="0.04" y2="1">${GOLD_STOPS}</linearGradient></defs>`
-      : '';
-  return (
-    defs +
-    `<g fill="none" stroke="${fill}" stroke-width="30" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="6">` +
-    '<polyline points="84,52 44,92 84,132"/>' +
-    '<polyline points="108,136 148,48"/>' +
-    '<polyline points="258,52 298,92 258,132"/>' +
-    '</g>' +
-    `<path d="M162,72 L214,58 L234,78 L208,96 L192,96 L192,132 L162,132 Z" fill="${fill}"/>`
-  );
+function glyph(variant: MarkVariant): string {
+  return `<g fill="${paint(variant)}" shape-rendering="geometricPrecision">${PATHS}</g>`;
 }
 
-/** Standalone mark on a transparent canvas (342x184). */
+/** Standalone mark on a transparent canvas. */
 export function markStandaloneSvg(variant: MarkVariant = 'gold'): string {
   return (
-    '<svg xmlns="http://www.w3.org/2000/svg" width="342" height="184" viewBox="0 0 342 184">' +
-    glyph(variant, 'std') +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="492" viewBox="-16 -16 1804 1732">' +
+    glyph(variant) +
     '</svg>'
   );
 }
 
-/** Rounded-square app icon: mark centered on an obsidian tile (512x512). */
+/** Rounded-square app icon: mark centered on an ink tile (512x512). */
 export function appIconSvg(
   variant: MarkVariant = 'gold',
   opts: { bg?: string; radius?: number } = {},
 ): string {
-  const { bg = '#0A0A0A', radius = 112 } = opts;
+  const { bg = '#07111f', radius = 112 } = opts;
   return (
     '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">' +
     `<rect width="512" height="512" rx="${radius}" fill="${bg}"/>` +
-    '<svg x="56" y="149" width="400" height="215" viewBox="0 0 342 184">' +
-    glyph(variant, 'icon') +
+    '<svg x="72" y="78" width="368" height="356" viewBox="-16 -16 1804 1732">' +
+    glyph(variant === 'black' ? 'gold' : variant) +
     '</svg>' +
     '</svg>'
   );

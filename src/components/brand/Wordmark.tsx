@@ -3,7 +3,7 @@
 import styles from './brand.module.css';
 
 export interface WordmarkProps {
-  /** "dark" = on dark surfaces (LAST in ivory). "light" = on light surfaces (LAST in black). */
+  /** "dark" = on dark surfaces. "light" = on light surfaces. */
   surface?: 'dark' | 'light';
   /** Render the tagline beneath the wordmark. */
   tagline?: boolean;
@@ -27,10 +27,12 @@ export default function Wordmark({
       style={{ fontSize }}
     >
       <div className={styles.wordmarkRow}>
-        <span className={styles.wordmarkLast}>LAST</span>
-        <span className={styles.wordmarkRev}>REV</span>
+        <span className={styles.wordmarkLast}>TCS</span>
+        <span className={styles.wordmarkRev}>REPAIR</span>
       </div>
-      {tagline && <div className={styles.tagline}>BUILD. AUTOMATE. ACCELERATE.</div>}
+      {tagline && (
+        <div className={styles.tagline}>WEBSITES. IT. TECHNOLOGY SUPPORT.</div>
+      )}
     </div>
   );
 }

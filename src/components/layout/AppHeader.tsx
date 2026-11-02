@@ -46,10 +46,10 @@ export default function AppHeader() {
 
           <Stack direction="row" spacing={2.5} sx={{ alignItems: 'center' }}>
             <Link
-              href="https://www.lastrev.com"
+              href="https://tcs.repair"
               target="_blank"
               rel="noopener"
-              aria-label="LastRev.com (opens in a new tab)"
+              aria-label="tcs.repair (opens in a new tab)"
               sx={{
                 fontFamily: 'var(--font-space-grotesk), var(--font-inter), sans-serif',
                 fontSize: '0.72rem',
@@ -60,7 +60,7 @@ export default function AppHeader() {
                 '&:hover': { color: 'primary.main' },
               }}
             >
-              LastRev.com
+              tcs.repair
             </Link>
           </Stack>
         </Stack>

@@ -1,17 +1,20 @@
 {
-  "name": "lr-status-page",
+  "name": "tcs-status-page",
   "version": "2.0.0",
   "private": true,
-  "description": "Last Rev Services Status Page - Next.js + Netlify + Sanity rebuild",
+  "description": "TCS Repair Services Status Page - Next.js + Netlify",
   "type": "module",
   "packageManager": "pnpm@11.8.0",
   "engines": {
     "node": ">=24 <25"
   },
   "scripts": {
-    "dev": "pnpm secure-run next dev",
-    "build": "pnpm secure-run next build",
-    "start": "pnpm secure-run next start",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "dev:secure": "pnpm secure-run next dev",
+    "build:secure": "pnpm secure-run next build",
+    "start:secure": "pnpm secure-run next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

@@ -15,23 +15,23 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL(publicEnv.NEXT_PUBLIC_SITE_URL),
-  applicationName: 'Last Rev Status',
+  applicationName: 'TCS Status',
   title: {
-    default: 'Last Rev Services Status',
-    template: '%s | Last Rev Status',
+    default: 'TCS Repair Services Status',
+    template: '%s | TCS Status',
   },
   description:
-    'A consolidated, real-time status view of the various third-party services the Last Rev team relies on — operational, degraded, outage, and maintenance states at a glance.',
+    'A consolidated, real-time status view of the third-party services TCS Repair relies on — operational, degraded, outage, and maintenance states at a glance.',
   appleWebApp: {
     capable: true,
-    title: 'LR Status',
+    title: 'TCS Status',
     statusBarStyle: 'black-translucent',
   },
   formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0A0A0A',
+  themeColor: '#07111f',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

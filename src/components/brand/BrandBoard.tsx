@@ -9,11 +9,11 @@ import ColorSwatch from './ColorSwatch';
 import styles from './brand.module.css';
 
 const PALETTE: { hex: string; name: string }[] = [
-  { hex: '#0A0A0A', name: 'Obsidian' },
-  { hex: '#1B1B1B', name: 'Charcoal' },
-  { hex: '#F6F6F4', name: 'Ivory' },
-  { hex: '#C8A96A', name: 'Champagne' },
-  { hex: '#9A9A9A', name: 'Graphite' },
+  { hex: '#07111f', name: 'Ink' },
+  { hex: '#111f2f', name: 'Surface Dark' },
+  { hex: '#f6fbff', name: 'Ivory' },
+  { hex: '#00aeef', name: 'Brand Cyan' },
+  { hex: '#aebdca', name: 'Muted' },
 ];
 
 function PanelLabel({ children }: { children: React.ReactNode }) {
@@ -27,17 +27,17 @@ export default function BrandBoard() {
         <header className={styles.boardHeader}>
           <div className={styles.boardHeaderLeft}>
             <LogoMark variant="gold" size={26} />
-            <span className={styles.boardKicker}>LAST REV — BRAND IDENTITY</span>
+            <span className={styles.boardKicker}>TCS REPAIR — BRAND IDENTITY</span>
           </div>
-          <span className={styles.boardHeaderRight}>BRACKET FORGE · CONCEPT 03</span>
+          <span className={styles.boardHeaderRight}>STATUS · DARK UI</span>
         </header>
 
         <div className={styles.grid}>
           {/* 1 — HERO ----------------------------------------------------- */}
           <section className={`${styles.panel} ${styles.hero}`}>
             <div className={styles.heroLabel}>
-              <PanelLabel>CONCEPT 3</PanelLabel>
-              <h1 className={styles.heroTitle}>BRACKET FORGE</h1>
+              <PanelLabel>PRIMARY</PanelLabel>
+              <h1 className={styles.heroTitle}>TCS REPAIR</h1>
               <span className={styles.goldLine} aria-hidden />
             </div>
             <div className={styles.heroCenter}>

@@ -7,8 +7,8 @@ import { schemaTypes } from './src/sanity/schemaTypes';
 import { publicEnv } from './src/lib/env';
 
 export default defineConfig({
-  name: 'lr-status-page',
-  title: 'LR Status Page',
+  name: 'tcs-status-page',
+  title: 'TCS Status Page',
   basePath: '/studio',
   projectId: publicEnv.NEXT_PUBLIC_SANITY_PROJECT_ID,
   dataset: publicEnv.NEXT_PUBLIC_SANITY_DATASET,

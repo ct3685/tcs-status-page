@@ -40,8 +40,8 @@ export default function AppFooter({ snapshot }: { snapshot: StatusSnapshot }) {
           <Stack direction="row" spacing={6}>
             <Stack spacing={1.25}>
               <Typography variant="overline">Resources</Typography>
-              <Link href="https://www.lastrev.com" target="_blank" rel="noopener" variant="body2">
-                Last Rev
+              <Link href="https://tcs.repair" target="_blank" rel="noopener" variant="body2">
+                TCS Repair
               </Link>
               <Link href="/api/status" variant="body2" color="text.secondary">
                 Status API
@@ -52,7 +52,7 @@ export default function AppFooter({ snapshot }: { snapshot: StatusSnapshot }) {
 
         <Box sx={{ mt: 4, pt: 2.5, borderTop: '1px solid', borderColor: 'divider' }}>
           <Typography variant="caption" color="text.secondary" sx={{ letterSpacing: '0.04em' }}>
-            © {new Date().getFullYear()} Last Rev — Build. Automate. Accelerate.
+            © {new Date().getFullYear()} TCS Repair
           </Typography>
         </Box>
       </Container>

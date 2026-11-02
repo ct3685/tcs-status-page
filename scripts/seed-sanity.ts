@@ -90,7 +90,7 @@ async function main() {
   await client.createIfNotExists({
     _id: 'statusPageSettings',
     _type: 'statusPageSettings',
-    title: "Last Rev Services Status",
+    title: 'TCS Repair Services Status',
     indexable: true,
     displayMode: 'grid',
   });

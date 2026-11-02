@@ -178,7 +178,7 @@ export async function fetchFeedText(
           accept:
             options.accept ??
             'application/rss+xml, application/atom+xml, application/xml, text/xml, application/json;q=0.9, */*;q=0.5',
-          'user-agent': 'LastRevStatusBot/2.0 (+https://status.lastrev.com)',
+          'user-agent': 'TCSStatusBot/2.0 (+https://status.tcs.repair)',
         },
       });
 

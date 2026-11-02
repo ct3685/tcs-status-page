@@ -5,7 +5,7 @@ import Wordmark from './Wordmark';
 import styles from './brand.module.css';
 
 export interface BusinessCardProps {
-  /** "obsidian" = black card, gold mark + wordmark + tagline. "ivory" = ivory card with URL. */
+  /** "obsidian" = dark card. "ivory" = light card with URL. */
   tone?: 'obsidian' | 'ivory';
   className?: string;
 }
@@ -15,7 +15,7 @@ export default function BusinessCard({ tone = 'obsidian', className }: BusinessC
     return (
       <div className={`${styles.card} ${styles.cardIvory} ${className ?? ''}`}>
         <LogoMark variant="black" size={26} />
-        <span className={styles.cardUrl}>LASTREV.COM</span>
+        <span className={styles.cardUrl}>TCS.REPAIR</span>
       </div>
     );
   }
@@ -27,7 +27,7 @@ export default function BusinessCard({ tone = 'obsidian', className }: BusinessC
       </div>
       <div className={styles.cardBottom}>
         <Wordmark surface="dark" size={18} />
-        <div className={styles.cardTagline}>BUILD. AUTOMATE. ACCELERATE.</div>
+        <div className={styles.cardTagline}>WEBSITES. IT. TECHNOLOGY SUPPORT.</div>
       </div>
     </div>
   );

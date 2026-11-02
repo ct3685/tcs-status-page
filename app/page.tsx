@@ -32,7 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       type: 'website',
       url,
-      siteName: 'Last Rev Status',
+      siteName: 'TCS Status',
       title,
       description,
       ...imageOverride,
@@ -52,7 +52,7 @@ export default async function HomePage() {
     '@type': 'WebSite',
     name: settings.title,
     url: publicEnv.NEXT_PUBLIC_SITE_URL,
-    publisher: { '@type': 'Organization', name: 'Last Rev', url: 'https://www.lastrev.com' },
+    publisher: { '@type': 'Organization', name: 'TCS Repair', url: 'https://tcs.repair' },
   };
 
   return (

@@ -12,7 +12,7 @@ export default function AppleIcon() {
         <img
           width={180}
           height={180}
-          alt="Last Rev"
+          alt="TCS Repair"
           src={toDataUri(appIconSvg('gold', { radius: 96 }))}
         />
       </div>

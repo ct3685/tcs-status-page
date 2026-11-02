@@ -11,7 +11,7 @@ export default function NavMockup({ className }: { className?: string }) {
       <div className={styles.navLeft}>
         <LogoMark variant="gold" size={24} />
         <span className={styles.navWord}>
-          LAST<span className={styles.navWordRev}>REV</span>
+          TCS<span className={styles.navWordRev}>REPAIR</span>
         </span>
       </div>
       <nav className={styles.navItems}>

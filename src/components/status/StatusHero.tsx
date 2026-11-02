@@ -39,7 +39,7 @@ export default function StatusHero({
         p: { xs: 3, md: 5 },
         border: '1px solid',
         borderColor: 'divider',
-        background: `radial-gradient(120% 140% at 0% 0%, ${v.glow} 0%, transparent 50%), radial-gradient(90% 120% at 100% 100%, rgba(200,169,106,0.05), transparent 55%), linear-gradient(160deg, #161616 0%, #0E0E0E 60%, #0A0A0A 100%)`,
+        background: `radial-gradient(120% 140% at 0% 0%, ${v.glow} 0%, transparent 50%), radial-gradient(90% 120% at 100% 100%, rgba(0,174,239,0.06), transparent 55%), linear-gradient(160deg, #0f1d2d 0%, #0a1624 60%, #07111f 100%)`,
       }}
     >
       <Stack spacing={2.25}>
