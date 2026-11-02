@@ -10,13 +10,14 @@ import BuildRoundedIcon from '@mui/icons-material/BuildRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import { LocalTime } from './Time';
 import { toneVisual } from './statusVisuals';
+import { compareScheduledMaintenance } from '@/lib/status/maintenance-order';
 import type { ServiceStatus } from '@/lib/status/types';
 
 export default function MaintenancePanel({ services }: { services: ServiceStatus[] }) {
   const MAX_VISIBLE = 8;
-  const items = services.flatMap((service) =>
-    service.scheduledMaintenance.map((incident) => ({ service, incident })),
-  );
+  const items = services
+    .flatMap((service) => service.scheduledMaintenance.map((incident) => ({ service, incident })))
+    .sort((a, b) => compareScheduledMaintenance(a.incident, b.incident));
   const hasCurrent = items.some(({ incident }) => incident.isCurrentMaintenance);
   const [open, setOpen] = useState(hasCurrent);
 
