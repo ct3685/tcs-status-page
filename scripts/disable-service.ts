@@ -1,7 +1,7 @@
 /**
  * Disable (or re-enable) a status service in Sanity without deleting it.
  * Usage:
- *   pnpm secure-run tsx scripts/disable-service.ts <slug> [--enable]
+ *   pnpm exec tsx scripts/disable-service.ts <slug> [--enable]
  *
  * Disabling sets `enabled: false`, which removes the service from the public
  * snapshot (buildSnapshot filters out disabled services) while preserving the
