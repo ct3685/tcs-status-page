@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const refreshStatusSnapshot = vi.hoisted(() => vi.fn());
 const snapshotAgeSeconds = vi.hoisted(() => vi.fn(() => 4));
 
-vi.mock('../../src/lib/status/cache', () => ({
+vi.mock('@/lib/status/cache', () => ({
   refreshStatusSnapshot,
   snapshotAgeSeconds,
 }));
 
-import handler from './update-status';
+import handler from '../../../netlify/functions/update-status';
 
 describe('scheduled status update', () => {
   beforeEach(() => {
