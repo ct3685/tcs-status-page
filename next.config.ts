@@ -51,8 +51,6 @@ const nextConfig: NextConfig = {
     // Sanity-hosted assets; logos served from the CDN.
     remotePatterns: [{ protocol: 'https', hostname: 'cdn.sanity.io' }],
   },
-  // Keep server-only packages out of the client bundle.
-  serverExternalPackages: ['sanitize-html'],
   experimental: {
     // Trim what gets traced into Netlify functions.
     optimizePackageImports: ['@mui/material', '@mui/icons-material'],
