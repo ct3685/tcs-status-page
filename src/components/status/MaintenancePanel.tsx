@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Collapse from '@mui/material/Collapse';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -18,13 +19,13 @@ export default function MaintenancePanel({ services }: { services: ServiceStatus
   const items = services
     .flatMap((service) => service.scheduledMaintenance.map((incident) => ({ service, incident })))
     .sort((a, b) => compareScheduledMaintenance(a.incident, b.incident));
-  const hasCurrent = items.some(({ incident }) => incident.isCurrentMaintenance);
-  const [open, setOpen] = useState(hasCurrent);
+  const [open, setOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   if (items.length === 0) return null;
   const tone = toneVisual('maintenance');
-  const visible = items.slice(0, MAX_VISIBLE);
-  const extra = items.length - visible.length;
+  const visible = showAll ? items : items.slice(0, MAX_VISIBLE);
+  const hidden = items.length - visible.length;
 
   return (
     <Paper
@@ -33,7 +34,12 @@ export default function MaintenancePanel({ services }: { services: ServiceStatus
     >
       <Box
         component="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() =>
+          setOpen((current) => {
+            if (current) setShowAll(false);
+            return !current;
+          })
+        }
         aria-expanded={open}
         aria-controls="maintenance-list"
         sx={{
@@ -92,10 +98,23 @@ export default function MaintenancePanel({ services }: { services: ServiceStatus
                 </Typography>
               </Box>
             ))}
-            {extra > 0 && (
-              <Typography variant="caption" color="text.secondary" sx={{ pt: 1 }}>
-                +{extra} more maintenance {extra === 1 ? 'window' : 'windows'}
-              </Typography>
+            {hidden > 0 && (
+              <Button
+                size="small"
+                onClick={() => setShowAll(true)}
+                sx={{ alignSelf: 'flex-start', color: 'text.secondary', px: 0, pt: 1 }}
+              >
+                +{hidden} more maintenance {hidden === 1 ? 'window' : 'windows'}
+              </Button>
+            )}
+            {showAll && items.length > MAX_VISIBLE && (
+              <Button
+                size="small"
+                onClick={() => setShowAll(false)}
+                sx={{ alignSelf: 'flex-start', color: 'text.secondary', px: 0, pt: 1 }}
+              >
+                Show fewer
+              </Button>
             )}
           </Stack>
         </Box>
