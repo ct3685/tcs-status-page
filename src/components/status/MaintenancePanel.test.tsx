@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it } from 'vitest';
 import MaintenancePanel from './MaintenancePanel';
 import type { Incident, ServiceStatus } from '@/lib/status/types';
 
@@ -60,10 +61,12 @@ function panelButton() {
 
 function serviceWithWindows(count: number): ServiceStatus {
   const base = service({ id: 'seed', title: 'seed', isCurrentMaintenance: false });
-  base.scheduledMaintenance = Array.from({ length: count }, (_, index) => {
+  const template = base.scheduledMaintenance[0];
+  if (!template) throw new Error('expected a maintenance window');
+  base.scheduledMaintenance = Array.from({ length: count }, (_, index): Incident => {
     const iso = new Date(Date.UTC(2026, 10, 4, 16, index)).toISOString();
     return {
-      ...base.scheduledMaintenance[0],
+      ...template,
       id: `w${index}`,
       sourceId: `w${index}`,
       title: `Window ${index + 1}`,
